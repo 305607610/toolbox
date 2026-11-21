@@ -1,0 +1,15 @@
+@font-face {
+  font-family: "JFZSK";
+  src: url("/fonts/JFZSKSealScript_V3.5.ttf") format("truetype");
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "ChongXi";
+  src: url("/fonts/chongxi_seal.otf") format("opentype");
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+}
