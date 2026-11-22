@@ -293,7 +293,7 @@ export default function PdfTool() {
       {!previewHtml ? (
         <div className="pdf-empty-wrap">
           <div
-            className={`pdf-drop${dragging ? " is-active" : ""}`}
+            className="pdf-drop"
             onClick={() => {
               if (!loading) openPicker();
             }}
