@@ -1,7 +1,7 @@
 import type { LucideIcon } from "lucide-react";
-import { FileCode2, ImageDown, Stamp } from "lucide-react";
+import { FileCode2, IdCard, ImageDown, Stamp } from "lucide-react";
 
-export type ToolId = "seal" | "compress" | "pdf";
+export type ToolId = "seal" | "compress" | "idphoto" | "pdf";
 export type ToolGroupId = "documents" | "images";
 
 export interface ToolGroup {
@@ -43,6 +43,16 @@ export const tools: Tool[] = [
       "无损 / 有损压缩图片，在控制画质损耗的前提下减小图片体积，支持批量处理",
     tags: ["JPG", "PNG", "WebP", "批量"],
     icon: ImageDown,
+    planned: [],
+  },
+  {
+    id: "idphoto",
+    name: "证件照",
+    groupId: "images",
+    description:
+      "一寸、二寸证件照制作，自动更换底色，可排版到 6 寸相纸打印",
+    tags: ["一寸", "二寸", "换底色", "排版打印"],
+    icon: IdCard,
     planned: [],
   },
   {

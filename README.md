@@ -1,6 +1,6 @@
 # 叮当
 
-叮当是一个 Windows 桌面工具合集。当前版本已实现电子印章、图片压缩和 PDF 转 HTML 三个工具。
+叮当是一个 Windows 桌面工具合集。当前版本已实现电子印章、图片压缩、PDF 转 HTML 和证件照四个工具。
 
 ## 技术栈
 
@@ -54,6 +54,15 @@ npm run tauri build
 - 逐张显示原始/压缩后体积与画质损耗，支持单张对比预览。
 - 导出全部到指定文件夹，或逐张导出。
 
+## 证件照
+
+- 一寸、小一寸、大一寸、二寸、小二寸、大二寸六种规格，按 300 DPI 输出精确像素尺寸。
+- 导入照片后拖动、缩放构图，显示头顶与下巴辅助线；白底、蓝底、红底或原背景一键切换。
+- 换底色在本地完成：从顶部与上侧取样背景色，只去除与画面边缘连通的相近区域，容差与羽化可调；无法识别时保留原图并提示。
+- 6 寸相纸排版：按规格自动计算张数（4–12 张），居中排列并带裁切线。
+- 导出 JPG/PNG，JPG 写入 JFIF 300 DPI、PNG 写入 pHYs，按毫米尺寸打印。
+- 纯色背景、深色上衣的正面免冠照效果最好；与背景同色的衣物可能与背景一起被识别。
+
 ## PDF 转 HTML
 
 - 单个 PDF 转成单个可离线打开的 HTML，页面尺寸与分页保持不变。
@@ -71,6 +80,7 @@ npm run tauri build
 - 两列工具卡片，含悬停、键盘焦点与「打开」动作
 - 电子印章工具：四种模式、实时预览、PNG/SVG 导出与原生保存对话框
 - 图片压缩工具：批量、目标体积、对比预览与批量导出
+- 证件照工具：规格切换、本地换底色、构图辅助线与 6 寸排版导出
 - PDF 转 HTML 工具：逐页预览、可编辑文字层、可替换图片、单文件导出与保存副本
 - 空搜索、空分组、未知工具的状态；Escape 返回
 
@@ -79,16 +89,18 @@ npm run tauri build
 - `src/pages/Home.tsx`：工作台首页、搜索与分组过滤
 - `src/pages/SealTool.tsx`：电子印章工作区、模式切换与导出
 - `src/pages/CompressTool.tsx`：图片压缩工作区
+- `src/pages/IdPhotoTool.tsx`：证件照工作区、预览、换底色、排版与导出
 - `src/pages/PdfTool.tsx`：PDF 转 HTML 工作区、预览、设置与导出
 - `src/seal/`：印章几何、SVG/Canvas 渲染、字体、导出、签名与保存
 - `src/compress/`：图片压缩与批量导出
+- `src/idphoto/`：证件照规格、背景抠图、6 寸排版与 DPI 元数据
 - `src-tauri/src/pdf.rs`：PDFium 对象抽取、字体/图片/SVG 重组与单文件 HTML 输出
 - `src/pdf/`：前端保存单文件 HTML
 - `src-tauri/resources/`：`pdfium.dll` 与其 BSD 许可
 - `src/components/`：自绘顶栏、侧栏、工具卡片
 - `src/tools.ts`：工具与分组的产品内容
 - `src/styles/global.css`：布局、主题变量与视觉细节
-- `src/styles/seal.css` / `compress.css` / `pdf.css`：三个工具的工作区布局
+- `src/styles/seal.css` / `compress.css` / `pdf.css` / `idphoto.css`：四个工具的工作区布局
 - `src/styles/fonts.css`：内置字体声明
 - `src-tauri/`：Tauri 外壳、窗口配置、dialog 插件与图标
 - `public/app.png`：应用图标；`src-tauri/icons` 由它生成并携带来源信息

@@ -6,6 +6,7 @@ import { HashRouter, Navigate, Route, Routes } from "react-router-dom";
 import AppShell from "./components/AppShell";
 import CompressTool from "./pages/CompressTool";
 import Home from "./pages/Home";
+import IdPhotoTool from "./pages/IdPhotoTool";
 import PdfTool from "./pages/PdfTool";
 import SealTool from "./pages/SealTool";
 import ToolPage from "./pages/ToolPage";
@@ -96,6 +97,7 @@ export default function App() {
               <Route index element={<Home />} />
               <Route path="tool/seal" element={<SealTool />} />
               <Route path="tool/compress" element={<CompressTool />} />
+              <Route path="tool/idphoto" element={<IdPhotoTool />} />
               <Route path="tool/pdf" element={<PdfTool />} />
               <Route path="tool/:toolId" element={<ToolPage />} />
               <Route path="*" element={<Navigate to="/" replace />} />

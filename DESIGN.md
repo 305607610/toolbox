@@ -35,6 +35,8 @@ colors:
   paper-checker: "#FAFAF7"
   seal-warn: "#B42318"
   seal-warn-dark: "#F87171"
+  id-photo-blue: "#438EDB"
+  id-photo-red: "#D9001B"
 typography:
   display:
     fontFamily: '"Segoe UI Variable Text", "Segoe UI", "Microsoft YaHei UI", "Microsoft YaHei", system-ui, sans-serif'
@@ -214,7 +216,7 @@ A Windows utility that behaves like Windows, not like a themed microsite. The wo
 
 Craft lives in the smallest mechanics: a 1px line that never doubles, a 44px icon block that lines up across both columns, a search field that focuses on Ctrl K, a card that lifts 2px and settles back. There is no decorative layer to maintain. Every surface either holds a tool or helps someone find one.
 
-The implemented tools extend the same workbench without inventing a second world. 电子印章 keeps the fixed frame and blue UI, but gives the artifact an unthemed paper stage: white in both themes, a 24px checkerboard for transparency, a red seal that is content rather than chrome, and an export block pinned to the top of the right panel so the primary action never scrolls away. 图片压缩 is a batch list with a sticky settings panel. PDF 转 HTML is a viewer: a scrollable field of white pages on the left, a 340px inspector on the right, and an export block that stays at the panel's top while pages scroll.
+The implemented tools extend the same workbench without inventing a second world. 电子印章 keeps the fixed frame and blue UI, but gives the artifact an unthemed paper stage: white in both themes, a 24px checkerboard for transparency, a red seal that is content rather than chrome, and an export block pinned to the top of the right panel so the primary action never scrolls away. 图片压缩 is a batch list with a sticky settings panel. PDF 转 HTML is a viewer: a scrollable field of white pages on the left, a 340px inspector on the right, and an export block that stays at the panel's top while pages scroll. 证件照 is a light-table portrait stage beside a 340px inspector, with the same sticky export block and a 单张/排版 switch that turns the stage into a 6-inch print sheet.
 
 The identity is deliberately split. `叮当` is the name people read in the titlebar and installer; `Toolbox` is the name the filesystem sees. The supplied `public/app.png` is the only raster identity, and every functional icon is Lucide linework.
 
@@ -226,7 +228,7 @@ The identity is deliberately split. `叮当` is the name people read in the titl
 - 1px hairlines, 12px cards, 5–14px interior radii, and one authored hover lift.
 - Keyboard-complete: Ctrl K focuses search, Enter opens the first result, Escape clears or returns, and focus is always visible.
 - Brand raster for identity; Lucide linework for function; no emoji and no glyph icons.
-- The seal and PDF workspaces are paper-white at the center and blue at the edges: preview and content stay unthemed, export and controls stay in the workbench's UI language.
+- The seal, PDF and 证件照 workspaces keep the artifact itself unthemed while the surrounding UI stays blue: paper-white portrait or page, light-table field, export and controls in the workbench's language.
 
 Surface briefs: `.impeccable/surfaces/home.md` for the workbench and `.impeccable/surfaces/seal.md` for 电子印章.
 
@@ -256,6 +258,7 @@ A warm-neutral paper palette under a single blue UI signal, mirrored into a cool
 ### Content
 - **Seal Ink** (#D40000 default): the seal artwork's ink: ring, star, arc text, and personal-seal glyphs. It is a content color, editable by the user (presets #D40000, #C8102E, #E60012, #A61B29), and it never becomes a UI accent. It does not flip in dark mode; it is ink on paper.
 - **Signature Ink** (Ink #1C1D20 by default): the signature pad's pen color, with #1E3A5F and #334155 presets. It is content, not UI text, even when the default value coincides with Ink.
+- **ID Photo Backgrounds** (#FFFFFF, #438EDB, #D9001B): the three printed background presets offered by 证件照. They are artifact fills selected by the user, never UI accents, and they never replace Launcher Blue in the surrounding interface.
 
 ### Semantic
 - **Close Red** (#C42B1C): only the close button's hover fill, with white text. It is a Windows convention, not a second brand accent.
@@ -324,6 +327,7 @@ The shell is exactly `100vh`; `.app-main` is the only scroll container and gets 
 - **Seal workspace:** `max-width: 1180px`; two panes at `minmax(0, 1fr) 340px` with a 24px gap and 24px top margin. At ≤1120px the panel becomes 300px and the gap 20px. At ≤980px the workspace becomes one column and the stage stops sticking. The left stage is sticky at `top: 0`; the 340px right panel is a Card White card, and its export block is sticky at `top: 0` inside it.
 - **Seal paper:** `min-height: 460px` with 28px padding; signature mode uses the plain variant at `min-height: 340px` and 24px padding with no checkerboard. Both are 12px radius, 1px `rgba(20, 22, 26, 0.08)`, and the resting card shadow. Artboards cap at 340px (official), 400px (oval), 300px (personal), and 620px (signature, 2:1). The caption is 12px Quiet Ink, centered, 12px below the paper.
 - **Seal panel internals:** inner padding `20px 20px 6px`; sections separate with a 22px top margin, 20px top padding, and a 1px top hairline. Export padding is `16px 20px 18px` with a 1px bottom hairline and a 12px top-only radius. Form items sit 16px apart; labels are 12px, panel labels 11px/600/0.02em, notes 12px/1.55, and the two-column field row uses a 12px gap.
+- **ID photo workspace:** `max-width: 1180px`; a portrait stage and a 340px inspector with a 20px gap. The stage head carries the file name, a small 单张/排版 Segmented and 更换; the viewer is a `clamp(380px, 56vh, 560px)` light table (#E7E7E3) with 20px inset and a contained canvas. The 11px footer reports millimetres, pixels and sheet count. At ≤1120px the inspector is 320px with a 16px gap; at ≤980px it stacks and the export block stops sticking.
 
 **Responsive behavior:** 1120px trims the sidebar, search, and page padding without changing the composition. 920px stacks the card grid and makes the search full width; 980px stacks the seal workspace. Because the production window has a 1040px minimum, both stacked states are browser-preview/future-surface states rather than shipped desktop states.
 
@@ -391,7 +395,7 @@ Ant Design tags with transparent fill, 1px Hairline, 5px radius, 11px Quiet Ink,
 The shipped buttons are Ant Design defaults under a no-shadow theme: 10px radius, 36px control height, font weight 500, and no primary/default/danger shadow. Text buttons (the back action) are Quiet Ink and turn Ink on hover. The empty state uses a default button. Do not restyle these into custom widgets; the product's constraint is that standard controls keep standard behavior. Each implemented tool has exactly one primary-filled export action: Ant Design primary, large (40px), with a Download glyph; the seal adds a 40px chevron split for SVG. Primary is Launcher Blue, never Seal Ink.
 
 ### Tool Page (signature)
-Unimplemented tools use a 920px-wide honest placeholder, not a fake tool. The back text button (ArrowLeft 16px at 1.8, Quiet Ink) returns to the previous view or home; Escape does the same. The header pairs a 56px icon block (14px radius, 26px Lucide glyph at 1.6) with a 30px H1, a 14px/1.6 description capped at 56ch, and the group/tag row. A Selected Blue Wash info strip (10px radius, `14px 16px` padding, 16px Info glyph in Deep Launcher Blue) states: “此工具将在下一阶段接入，当前先保留入口。” Below a 1px divider, “计划中的步骤” is a 15px heading over wrapping plan cards: Card White, 1px Hairline, 10px radius, `12px 14px` padding, 180px minimum, a 24px circular tabular number in Hover Mist, and a 13px label. All three current tools are implemented and replace the plan area with their own workspace. 电子印章 and PDF 转 HTML use the full 1180px width; 图片压缩 uses the same shell with a batch list and sticky settings panel.
+Unimplemented tools use a 920px-wide honest placeholder, not a fake tool. The back text button (ArrowLeft 16px at 1.8, Quiet Ink) returns to the previous view or home; Escape does the same. The header pairs a 56px icon block (14px radius, 26px Lucide glyph at 1.6) with a 30px H1, a 14px/1.6 description capped at 56ch, and the group/tag row. A Selected Blue Wash info strip (10px radius, `14px 16px` padding, 16px Info glyph in Deep Launcher Blue) states: “此工具将在下一阶段接入，当前先保留入口。” Below a 1px divider, “计划中的步骤” is a 15px heading over wrapping plan cards: Card White, 1px Hairline, 10px radius, `12px 14px` padding, 180px minimum, a 24px circular tabular number in Hover Mist, and a 13px label. All four current tools are implemented and replace the plan area with their own workspace. 电子印章 and PDF 转 HTML use the full 1180px width; 图片压缩 uses the same shell with a batch list and sticky settings panel; 证件照 uses a light-table portrait stage with a 340px inspector.
 
 **The Honest Placeholder Rule.** Until a tool is wired up, show the info strip and the planned steps. Never mock a working tool interior or imply functionality that is not there.
 
@@ -451,6 +455,16 @@ The export is one self-contained HTML. Each page is a white section at its 96dpi
 
 **The Object-Element Rule.** Never flatten the page into one screenshot. PDFium page objects become real elements: text becomes per-character positioned spans, paths (including cubic beziers and their clip paths) become SVG, and images become `<img>`. Only constructs that cannot be separated (patterns, shadings, clipped images, scanned pages) stay in a bottom raster layer, and the interface says that part is graphic-only rather than pretending it is editable.
 
+### ID Photo Workspace (signature)
+
+The fourth implemented tool. It keeps the fixed frame and the compact back topbar, then splits into a paper-white portrait stage on the left and a 340px inspector on the right. The stage head carries the file name and dimensions, a small 单张/排版 Segmented, and 更换; the viewer is a light table (#E7E7E3) with the portrait contained inside, so the photo is judged as a print rather than as app chrome. The 11px footer reports millimetres, pixels and sheet count. In 单张 view the preview draws two blue dashed composition guides (头顶 and 下巴) and a faint centre line; they never enter the export.
+
+**The Light-Table Rule.** The portrait stage is a neutral light table in both themes, not a themed surface. The photo, sheet and cut lines are content; only the surrounding UI changes with the theme. Composition guides are preview chrome and must be drawn on the preview canvas only, never on the export canvas.
+
+The inspector is one card: a sticky export block, then 规格, 背景, 人像 and 输出. 规格 is a Select of six common Chinese sizes, each with an exact 300 DPI pixel size. 背景 is a four-option Segmented with artifact swatches (白底/蓝底/红底/原背景); with a replacement colour active, 容差 and 羽化 sliders tune the local cutout and a quiet spinner reports 识别中. 人像 holds 缩放, 水平, 垂直 and the 构图辅助线 switch, with the photo itself draggable in the stage; the bounds and sliders share the same maxima. 输出 holds JPG/PNG and a JPG quality slider and reports the live approximate file size. In 排版 mode the stage becomes the 6-inch sheet at 300 DPI with the count in the footer and export meta; the output group states that the sheet is fixed to PNG. Export is one full-width primary action whose label follows the mode, disabled while the matte is being prepared.
+
+The background replacement is a local colour cutout, not a model: it samples the top and upper sides, grows a region from those edges with an adaptive colour-distance cap, chokes and feathers the matte, and decontaminates soft edge pixels. That keeps a white shirt on a blue backdrop from disappearing. It cannot separate same-coloured clothing from the background, so 原背景 always remains available and the empty state sets the expectation. Exports write 300 DPI into the JPEG JFIF header and the PNG pHYs chunk; the print sheet is 6 × 4 inches with per-photo cut lines. Filenames follow `证件照_{规格}_{底色}_{宽}x{高}.jpg` and `证件照_{规格}_6寸排版_{N}张.png`.
+
 ### Empty State
 A dashed 1px Hairline Strong boundary at 12px radius, `56px 24px` padding, with a 44px circular Hover Mist glyph (SearchX or Info at 20px/1.7), a 16px/600 heading, a 13px Quiet Ink line, and one default Ant Design button. It appears for no search matches and for an empty group. The copy names the recovery: clear the search or view all tools.
 
@@ -487,6 +501,7 @@ Text selection is Launcher Blue with white in light mode (5.2:1); in dark mode i
 - **Do** expose every geometry parameter as a Metric Field: label, numeric input with unit, and slider. Auto font is a starting point, not a hidden default.
 - **Do** group the inspector by the object being edited — 单位名称, 章型与底部文字, 编号, 五角星, 整体 — so content and geometry sit together; the default official number is arc-set.
 - **Do** pause export on overflow, missing glyphs, font-load failure, or overlapping star/text/number, and repeat the blocking reason above the export button.
+- **Do** keep the ID-photo preview on the #E7E7E3 light table, draw composition guides only on the preview canvas, and write 300 DPI into both JPEG and PNG exports.
 
 ### Don't:
 - **Don't** introduce a second accent, gradients, decorative color fields, glass, glow, or `4px 4px 0` hard block shadows.
@@ -505,3 +520,4 @@ Text selection is Launcher Blue with white in light mode (5.2:1); in dark mode i
 - **Don't** silently clip text, let glyphs cross the frame, or export a star/bottom text/number collision.
 - **Don't** make the user discover a blocked export only after clicking; state the block above the button.
 - **Don't** call the CC BY-ND 崇羲 font open source, subset it, convert it, or modify it; keep its attribution and license file with the app.
+- **Don't** use the ID-photo white/blue/red background presets as UI accents, and don't bake the preview guides into an exported photo.
