@@ -22,6 +22,7 @@ export async function encodePhoto(
   canvas: HTMLCanvasElement,
   format: IdPhotoFormat,
   quality: number,
+  dpi = ID_PHOTO_DPI,
 ): Promise<Uint8Array> {
   const blob = await canvasToBlob(
     canvas,
@@ -30,8 +31,8 @@ export async function encodePhoto(
   );
   const bytes = new Uint8Array(await blob.arrayBuffer());
   return format === "png"
-    ? insertPngDpi(bytes, ID_PHOTO_DPI)
-    : setJpegDpi(bytes, ID_PHOTO_DPI);
+    ? insertPngDpi(bytes, dpi)
+    : setJpegDpi(bytes, dpi);
 }
 
 /**

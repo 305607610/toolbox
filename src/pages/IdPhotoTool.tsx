@@ -39,9 +39,11 @@ import {
   type BackgroundId,
 } from "../idphoto/specs";
 import {
+  ORIGINAL_MAX_EDGE,
   clamp,
   drawGuides,
   offsetBounds,
+  originalExportSize,
   prepareForeground,
   renderPhoto,
   renderSheet,
@@ -54,6 +56,7 @@ import {
 import "../styles/idphoto.css";
 
 type StageMode = "single" | "sheet";
+type OutputScale = "standard" | "original";
 
 interface SourcePhoto {
   name: string;
@@ -84,6 +87,10 @@ export default function IdPhotoTool() {
   const bitmapRef = useRef<ImageBitmap | null>(null);
   const panRef = useRef<PanState | null>(null);
   const dragDepth = useRef(0);
+  const hiForegroundRef = useRef<{
+    key: string;
+    canvas: HTMLCanvasElement | null;
+  } | null>(null);
 
   const [source, setSource] = useState<SourcePhoto | null>(null);
   const [specId, setSpecId] = useState(DEFAULT_SPEC_ID);
@@ -97,6 +104,7 @@ export default function IdPhotoTool() {
   const [stageMode, setStageMode] = useState<StageMode>("single");
   const [format, setFormat] = useState<IdPhotoFormat>("jpg");
   const [quality, setQuality] = useState(92);
+  const [outputScale, setOutputScale] = useState<OutputScale>("standard");
   const [foreground, setForeground] = useState<HTMLCanvasElement | null>(null);
   const [fallback, setFallback] = useState(false);
   const [masking, setMasking] = useState(false);
@@ -109,6 +117,21 @@ export default function IdPhotoTool() {
   const spec = useMemo(() => specById(specId), [specId]);
   const pixels = useMemo(() => specPixels(spec), [spec]);
   const sheet = useMemo(() => sheetLayout(spec), [spec]);
+  const originalSize = useMemo(() => {
+    if (!source) {
+      return {
+        width: pixels.width,
+        height: pixels.height,
+        scale: 1,
+        dpi: ID_PHOTO_DPI,
+      };
+    }
+    return originalExportSize(
+      { width: source.width, height: source.height },
+      spec,
+      zoom / 100,
+    );
+  }, [source, spec, zoom, pixels.width, pixels.height]);
   const backgroundPreset = backgroundById(background);
   const removeBackground = backgroundPreset.color !== null;
 
@@ -158,6 +181,31 @@ export default function IdPhotoTool() {
     effectiveY,
   ]);
 
+  const ensureHighResForeground = useCallback(async () => {
+    if (!source) return null;
+    const bitmap = bitmapRef.current;
+    if (!bitmap) return null;
+    const key = `${source.name}:${source.size}:${source.width}x${source.height}:${tolerance}:${feather}`;
+    const cached = hiForegroundRef.current;
+    if (cached?.key === key) return cached.canvas;
+
+    // Let the export button show its loading state before the blocking pass.
+    await new Promise((resolve) => window.setTimeout(resolve, 0));
+    try {
+      const result = prepareForeground(
+        bitmap,
+        tolerance,
+        feather,
+        ORIGINAL_MAX_EDGE,
+      );
+      hiForegroundRef.current = { key, canvas: result.canvas };
+      return result.canvas;
+    } catch {
+      hiForegroundRef.current = { key, canvas: null };
+      return null;
+    }
+  }, [source, tolerance, feather]);
+
   const loadPhoto = useCallback(
     async (file: File) => {
       if (!SUPPORTED_TYPES.includes(file.type)) {
@@ -175,6 +223,7 @@ export default function IdPhotoTool() {
         }
         const previous = bitmapRef.current;
         bitmapRef.current = bitmap;
+        hiForegroundRef.current = null;
         setForeground(null);
         setFallback(false);
         setSource({
@@ -288,7 +337,7 @@ export default function IdPhotoTool() {
   }, [buildPhoto, stageMode, guides, spec]);
 
   useEffect(() => {
-    if (stageMode !== "single" || !source) {
+    if (stageMode !== "single" || !source || outputScale !== "standard") {
       setApproxBytes(null);
       return;
     }
@@ -312,7 +361,7 @@ export default function IdPhotoTool() {
       cancelled = true;
       window.clearTimeout(timer);
     };
-  }, [buildPhoto, stageMode, source, format, quality]);
+  }, [buildPhoto, stageMode, source, format, quality, outputScale]);
 
   useEffect(() => {
     const handler = (event: KeyboardEvent) => {
@@ -427,15 +476,19 @@ export default function IdPhotoTool() {
   };
 
   const exportPhoto = async () => {
-    if (!source || exporting || masking) return;
-    const photo = buildPhoto();
-    if (!photo) return;
-
+    if (!source || exporting || masking || loading) return;
     setExporting(true);
     try {
       if (stageMode === "sheet") {
+        const photo = buildPhoto();
+        if (!photo) return;
         const rendered = renderSheet(photo, spec);
-        const bytes = await encodePhoto(rendered.canvas, "png", 1);
+        const bytes = await encodePhoto(
+          rendered.canvas,
+          "png",
+          1,
+          ID_PHOTO_DPI,
+        );
         const stem = sanitizeFilename(
           `证件照_${spec.name}_6寸排版_${rendered.layout.count}张`,
           "证件照",
@@ -444,16 +497,64 @@ export default function IdPhotoTool() {
         if (result.status === "saved") {
           message.success(`已导出：${result.path}`);
         }
-      } else {
-        const bytes = await encodePhoto(photo, format, quality / 100);
+        return;
+      }
+
+      if (outputScale === "original") {
+        let image: ImageBitmap | HTMLCanvasElement | null = bitmapRef.current;
+        if (!image) return;
+        if (removeBackground) {
+          if (originalSize.scale > 1.01) {
+            const highResolution = await ensureHighResForeground();
+            if (highResolution) image = highResolution;
+            else if (foreground) image = foreground;
+          } else if (foreground) {
+            image = foreground;
+          }
+        }
+        const photo = renderPhoto(
+          image,
+          spec,
+          backgroundPreset.color,
+          {
+            zoom: zoom / 100,
+            offsetX: effectiveX,
+            offsetY: effectiveY,
+          },
+          originalSize.scale,
+        );
+        const bytes = await encodePhoto(
+          photo,
+          format,
+          quality / 100,
+          originalSize.dpi,
+        );
         const stem = sanitizeFilename(
-          `证件照_${spec.name}_${backgroundPreset.label}_${pixels.width}x${pixels.height}`,
+          `证件照_${spec.name}_${backgroundPreset.label}_${originalSize.width}x${originalSize.height}`,
           "证件照",
         );
         const result = await saveExport(bytes, stem, format);
         if (result.status === "saved") {
           message.success(`已导出：${result.path}`);
         }
+        return;
+      }
+
+      const photo = buildPhoto();
+      if (!photo) return;
+      const bytes = await encodePhoto(
+        photo,
+        format,
+        quality / 100,
+        ID_PHOTO_DPI,
+      );
+      const stem = sanitizeFilename(
+        `证件照_${spec.name}_${backgroundPreset.label}_${pixels.width}x${pixels.height}`,
+        "证件照",
+      );
+      const result = await saveExport(bytes, stem, format);
+      if (result.status === "saved") {
+        message.success(`已导出：${result.path}`);
       }
     } catch (error) {
       message.error(error instanceof Error ? error.message : "导出失败");
@@ -573,13 +674,11 @@ export default function IdPhotoTool() {
 
             <footer className="idp-stage-foot">
               <span>
-                {stageMode === "sheet"
-                  ? `6 寸相纸 · ${sheet.width} × ${sheet.height} px`
-                  : `${spec.widthMm} × ${spec.heightMm} mm · ${pixels.width} × ${pixels.height} px`}
+                {stageMode === "sheet" ? `6 寸相纸 · ${sheet.count} 张` : ""}
               </span>
               <span>
                 {stageMode === "sheet"
-                  ? `${sheet.count} 张 · ${ID_PHOTO_DPI} DPI`
+                  ? ""
                   : moving
                     ? "松开完成"
                     : "拖动画面调整位置"}
@@ -592,9 +691,7 @@ export default function IdPhotoTool() {
               <div className="idp-export-head">
                 <span className="idp-export-title">导出</span>
                 <span className="idp-export-meta">
-                  {stageMode === "single"
-                    ? `${format.toUpperCase()} · ${pixels.width} × ${pixels.height}`
-                    : `6 寸 · ${sheet.count} 张`}
+                  {stageMode === "single" ? format.toUpperCase() : "PNG"}
                 </span>
               </div>
               <Button
@@ -604,18 +701,18 @@ export default function IdPhotoTool() {
                 className="idp-export-btn"
                 icon={<Download size={16} strokeWidth={1.8} />}
                 loading={exporting}
-                disabled={masking}
+                disabled={masking || loading}
                 onClick={() => void exportPhoto()}
               >
                 {stageMode === "single" ? "导出证件照" : "导出排版图"}
               </Button>
-              <p className="idp-export-note">
-                {stageMode === "single"
-                  ? `${ID_PHOTO_DPI} DPI · 打印尺寸 ${spec.widthMm} × ${spec.heightMm} mm${
-                      approxBytes ? ` · 约 ${formatBytes(approxBytes)}` : ""
-                    }`
-                  : "PNG · 300 DPI · 含裁切线"}
-              </p>
+              {stageMode === "single" &&
+                outputScale === "standard" &&
+                approxBytes && (
+                  <p className="idp-export-note">
+                    约 {formatBytes(approxBytes)}
+                  </p>
+                )}
             </div>
 
             <div className="idp-groups">
@@ -623,20 +720,51 @@ export default function IdPhotoTool() {
                 <div className="idp-group-head">
                   <h2 className="idp-group-title">规格</h2>
                 </div>
-                <Select
-                  className="idp-select"
-                  aria-label="证件照规格"
-                  value={specId}
-                  options={ID_PHOTO_SPECS.map((item) => ({
-                    value: item.id,
-                    label: item.name,
-                  }))}
-                  onChange={(value) => setSpecId(value)}
-                />
-                <p className="idp-note">
-                  {spec.widthMm} × {spec.heightMm} mm · {pixels.width} ×{" "}
-                  {pixels.height} px
-                </p>
+                <div className="idp-field">
+                  <div className="idp-label-row">
+                    <span className="idp-label">照片规格</span>
+                  </div>
+                  <Select
+                    className="idp-select"
+                    aria-label="证件照规格"
+                    value={specId}
+                    options={ID_PHOTO_SPECS.map((item) => ({
+                      value: item.id,
+                      label: item.name,
+                    }))}
+                    onChange={(value) => setSpecId(value)}
+                  />
+                  <p className="idp-note">
+                    {spec.widthMm} × {spec.heightMm} mm
+                  </p>
+                </div>
+
+                {stageMode === "single" && (
+                  <div className="idp-field">
+                    <div className="idp-label-row">
+                      <span className="idp-label">导出尺寸</span>
+                    </div>
+                    <Segmented
+                      block
+                      size="small"
+                      className="idp-segmented"
+                      aria-label="导出尺寸"
+                      value={outputScale}
+                      options={[
+                        { label: "标准 300 DPI", value: "standard" },
+                        { label: "原图分辨率", value: "original" },
+                      ]}
+                      onChange={(value) =>
+                        setOutputScale(value as OutputScale)
+                      }
+                    />
+                    <p className="idp-note">
+                      {outputScale === "original"
+                        ? `${originalSize.width} × ${originalSize.height} px`
+                        : `${pixels.width} × ${pixels.height} px`}
+                    </p>
+                  </div>
+                )}
               </section>
 
               <section className="idp-group">
@@ -825,15 +953,9 @@ export default function IdPhotoTool() {
                         />
                       </div>
                     )}
-                    <p className="idp-note">
-                      {ID_PHOTO_DPI} DPI · {pixels.width} × {pixels.height} px
-                    </p>
                   </>
                 ) : (
-                  <p className="idp-note">
-                    排版图固定为 PNG，按 6 寸相纸、{ID_PHOTO_DPI} DPI 导出，
-                    {sheet.count} 张一版。
-                  </p>
+                  <p className="idp-note">固定 PNG · {ID_PHOTO_DPI} DPI。</p>
                 )}
               </section>
             </div>

@@ -7,6 +7,9 @@ import {
 
 const WORK_MAX_EDGE = 1200;
 
+/** Upper bound for an "original size" export, in pixels on the long edge. */
+export const ORIGINAL_MAX_EDGE = 3000;
+
 export interface PhotoAdjustments {
   /** 1 = cover the frame exactly. */
   zoom: number;
@@ -41,12 +44,13 @@ export function prepareForeground(
   bitmap: ImageBitmap,
   tolerance: number,
   feather: number,
+  maxEdge = WORK_MAX_EDGE,
 ): ForegroundResult {
   const sourceWidth = bitmap.width;
   const sourceHeight = bitmap.height;
   const scale = Math.min(
     1,
-    WORK_MAX_EDGE / Math.max(sourceWidth, sourceHeight),
+    Math.max(1, maxEdge) / Math.max(sourceWidth, sourceHeight),
   );
   const width = Math.max(1, Math.round(sourceWidth * scale));
   const height = Math.max(1, Math.round(sourceHeight * scale));
@@ -233,6 +237,43 @@ export function offsetBounds(
   };
 }
 
+export interface ExportSize {
+  width: number;
+  height: number;
+  /** Multiplier applied to the standard 300 DPI footprint. */
+  scale: number;
+  dpi: number;
+}
+
+/**
+ * Uses the source pixels visible inside the current crop at 1:1. Never goes
+ * below the standard 300 DPI size, and caps the long edge so a 48MP phone
+ * photo cannot allocate a print-sized canvas that large.
+ */
+export function originalExportSize(
+  image: { width: number; height: number },
+  spec: IdPhotoSpec,
+  zoom: number,
+  maxEdge = ORIGINAL_MAX_EDGE,
+): ExportSize {
+  const base = specPixels(spec);
+  const cover = Math.max(base.width / image.width, base.height / image.height);
+  const sourcePixelsPerOutput = 1 / (cover * Math.max(1, zoom));
+  const capScale = Math.max(
+    1,
+    Math.max(1, maxEdge) / Math.max(base.width, base.height),
+  );
+  const scale = clamp(
+    Math.max(1, sourcePixelsPerOutput),
+    1,
+    capScale,
+  );
+  const width = Math.round(base.width * scale);
+  const height = Math.round(base.height * scale);
+  const dpi = Math.round(width / (spec.widthMm / 25.4));
+  return { width, height, scale: width / base.width, dpi };
+}
+
 type SizedSource = CanvasImageSource & { width: number; height: number };
 
 export function renderPhoto(
@@ -240,8 +281,11 @@ export function renderPhoto(
   spec: IdPhotoSpec,
   targetColour: string | null,
   adjustments: PhotoAdjustments,
+  pixelScale = 1,
 ): HTMLCanvasElement {
-  const { width, height } = specPixels(spec);
+  const base = specPixels(spec);
+  const width = Math.max(1, Math.round(base.width * pixelScale));
+  const height = Math.max(1, Math.round(base.height * pixelScale));
   const canvas = document.createElement("canvas");
   canvas.width = width;
   canvas.height = height;
