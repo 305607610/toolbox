@@ -1,7 +1,7 @@
 import type { LucideIcon } from "lucide-react";
-import { ImageDown, Stamp } from "lucide-react";
+import { FileCode2, ImageDown, Stamp } from "lucide-react";
 
-export type ToolId = "seal" | "compress";
+export type ToolId = "seal" | "compress" | "pdf";
 export type ToolGroupId = "documents" | "images";
 
 export interface ToolGroup {
@@ -43,6 +43,16 @@ export const tools: Tool[] = [
       "无损 / 有损压缩图片，在控制画质损耗的前提下减小图片体积，支持批量处理",
     tags: ["JPG", "PNG", "WebP", "批量"],
     icon: ImageDown,
+    planned: [],
+  },
+  {
+    id: "pdf",
+    name: "PDF 转 HTML",
+    groupId: "documents",
+    description:
+      "把 PDF 转成单个可离线打开的 HTML，原页原样呈现，文字可编辑、图片可替换",
+    tags: ["PDF", "HTML", "可编辑", "离线"],
+    icon: FileCode2,
     planned: [],
   },
 ];

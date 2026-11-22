@@ -214,7 +214,7 @@ A Windows utility that behaves like Windows, not like a themed microsite. The wo
 
 Craft lives in the smallest mechanics: a 1px line that never doubles, a 44px icon block that lines up across both columns, a search field that focuses on Ctrl K, a card that lifts 2px and settles back. There is no decorative layer to maintain. Every surface either holds a tool or helps someone find one.
 
-The first real tool, 电子印章, extends the same workbench without inventing a second world. Its page keeps the fixed frame and blue UI, but gives the artifact an unthemed paper stage: white in both themes, a 24px checkerboard for transparency, a red seal that is content rather than chrome, and an export block pinned to the top of the right panel so the primary action never scrolls away.
+The implemented tools extend the same workbench without inventing a second world. 电子印章 keeps the fixed frame and blue UI, but gives the artifact an unthemed paper stage: white in both themes, a 24px checkerboard for transparency, a red seal that is content rather than chrome, and an export block pinned to the top of the right panel so the primary action never scrolls away. 图片压缩 is a batch list with a sticky settings panel. PDF 转 HTML is a viewer: a scrollable field of white pages on the left, a 340px inspector on the right, and an export block that stays at the panel's top while pages scroll.
 
 The identity is deliberately split. `叮当` is the name people read in the titlebar and installer; `Toolbox` is the name the filesystem sees. The supplied `public/app.png` is the only raster identity, and every functional icon is Lucide linework.
 
@@ -226,7 +226,7 @@ The identity is deliberately split. `叮当` is the name people read in the titl
 - 1px hairlines, 12px cards, 5–14px interior radii, and one authored hover lift.
 - Keyboard-complete: Ctrl K focuses search, Enter opens the first result, Escape clears or returns, and focus is always visible.
 - Brand raster for identity; Lucide linework for function; no emoji and no glyph icons.
-- The seal workspace is paper-white at the center and blue at the edges: preview and ink are content, export and controls stay in the workbench's UI language.
+- The seal and PDF workspaces are paper-white at the center and blue at the edges: preview and content stay unthemed, export and controls stay in the workbench's UI language.
 
 Surface briefs: `.impeccable/surfaces/home.md` for the workbench and `.impeccable/surfaces/seal.md` for 电子印章.
 
@@ -388,10 +388,10 @@ The card is the product object: a whole-card link to one tool. Two columns, 16px
 Ant Design tags with transparent fill, 1px Hairline, 5px radius, 11px Quiet Ink, and `2px 8px` padding. They label tool kinds and file formats (公章, 个人章, 椭圆章, 手写签名, JPG, PNG, WebP). They are read-only in this build; there is no selected or filter state.
 
 ### Buttons
-The shipped buttons are Ant Design defaults under a no-shadow theme: 10px radius, 36px control height, font weight 500, and no primary/default/danger shadow. Text buttons (the back action) are Quiet Ink and turn Ink on hover. The empty state uses a default button. Do not restyle these into custom widgets; the product's constraint is that standard controls keep standard behavior. The seal export action is the product's one primary-filled button: Ant Design primary, large (40px), with a Download glyph and a 40px chevron split. It is Launcher Blue, never Seal Ink.
+The shipped buttons are Ant Design defaults under a no-shadow theme: 10px radius, 36px control height, font weight 500, and no primary/default/danger shadow. Text buttons (the back action) are Quiet Ink and turn Ink on hover. The empty state uses a default button. Do not restyle these into custom widgets; the product's constraint is that standard controls keep standard behavior. Each implemented tool has exactly one primary-filled export action: Ant Design primary, large (40px), with a Download glyph; the seal adds a 40px chevron split for SVG. Primary is Launcher Blue, never Seal Ink.
 
 ### Tool Page (signature)
-Unimplemented tools use a 920px-wide honest placeholder, not a fake tool. The back text button (ArrowLeft 16px at 1.8, Quiet Ink) returns to the previous view or home; Escape does the same. The header pairs a 56px icon block (14px radius, 26px Lucide glyph at 1.6) with a 30px H1, a 14px/1.6 description capped at 56ch, and the group/tag row. A Selected Blue Wash info strip (10px radius, `14px 16px` padding, 16px Info glyph in Deep Launcher Blue) states: “此工具将在下一阶段接入，当前先保留入口。” Below a 1px divider, “计划中的步骤” is a 15px heading over wrapping plan cards: Card White, 1px Hairline, 10px radius, `12px 14px` padding, 180px minimum, a 24px circular tabular number in Hover Mist, and a 13px label. 电子印章 is the first implemented tool: it overrides the page to 1180px and replaces the plan area with the seal workspace below. 图片压缩 still uses this placeholder.
+Unimplemented tools use a 920px-wide honest placeholder, not a fake tool. The back text button (ArrowLeft 16px at 1.8, Quiet Ink) returns to the previous view or home; Escape does the same. The header pairs a 56px icon block (14px radius, 26px Lucide glyph at 1.6) with a 30px H1, a 14px/1.6 description capped at 56ch, and the group/tag row. A Selected Blue Wash info strip (10px radius, `14px 16px` padding, 16px Info glyph in Deep Launcher Blue) states: “此工具将在下一阶段接入，当前先保留入口。” Below a 1px divider, “计划中的步骤” is a 15px heading over wrapping plan cards: Card White, 1px Hairline, 10px radius, `12px 14px` padding, 180px minimum, a 24px circular tabular number in Hover Mist, and a 13px label. All three current tools are implemented and replace the plan area with their own workspace. 电子印章 and PDF 转 HTML use the full 1180px width; 图片压缩 uses the same shell with a batch list and sticky settings panel.
 
 **The Honest Placeholder Rule.** Until a tool is wired up, show the info strip and the planned steps. Never mock a working tool interior or imply functionality that is not there.
 
@@ -428,6 +428,28 @@ A 300px square, 1:1 Canvas 2D artboard. The glyph layout is automatic (vertical 
 
 #### Signature Pad
 A 620px-max, 2:1 canvas on plain paper, with a dashed 1px baseline at the 22/30 line. Pointer events use capture; strokes are smoothed with quadratic segments, a minimum point distance, and an adjustable smoothing amount (0–100%, default 40). Pen width runs 1.5–6 (default 3); ink defaults to #1C1D20 with #1E3A5F and #334155 presets. Undo, redo, and clear sit as Ant Design buttons with 15px Lucide glyphs; history holds 50 states, and clearing is undoable. Export crops to the inked bounds plus the adjustable 1–8mm crop padding (default 3), writes a fixed 600 DPI PNG at the selected 30–80mm width, preserves the stroke aspect ratio, and supports transparent or white background. The canvas takes focus with the 2px accent outline at 3px offset.
+
+### PDF Workspace (signature)
+
+The third implemented tool. It keeps the 48px titlebar, 216px sidebar, compact back topbar, and the same card language, then splits into a page stage on the left and a 340px inspector on the right. The workspace fills the available height; only the stage body scrolls, so the export block never leaves the panel.
+
+#### Page Stage
+
+The stage is a viewer, not a white app surface: Card White frame, 1px Hairline, 12px radius, and the resting shadow. Its head carries the file name at 13px/600 and a tabular `N 页 · size` at 11px Quiet Ink. The body is a viewer-gray field (`#E7E7E3`) with no padding; it holds the generated HTML in an iframe. The preview is the actual export (preview mode) at 144 DPI: SVG table lines and bands, real text spans with embedded fonts, extracted images, and a raster bottom layer only for complex art. A fit script scales the page to the stage width with `zoom`, so the preview remains WYSIWYG without a second renderer.
+
+**The Page-Is-Content Rule.** PDF pages are paper, never themed chrome. They stay white in both themes; only the viewer field, captions, and inspector follow the theme. The preview must show the exported reconstruction, not a separate "original" rendering.
+
+#### PDF Inspector
+
+The panel is one card with three parts, in this order: the sticky export block, 文件, and 转换设置. Export is first and sticky so the primary action is present at every scroll position. It carries the `导出` label, a tabular `N 页 · DPI`, and a full-width primary `导出 HTML` with a 16px Download glyph. The button carries its busy state while the native conversion runs; it is disabled until the range is valid.
+
+文件 repeats the name and `N 页 · size` with a text `更换文件`. 转换设置 holds a block Segmented for 144 / 192 / 300 DPI (12px labels, 26px rows), a 全部 / 自定义 Segmented, and a custom range Input (`如 1-3,5,8-10`) with inline red validation. Warnings for scanned pages and graphic-only art sit in a quiet 11px note under the settings. No explanatory footnotes: the labels, units and warnings carry the meaning.
+
+#### Output Artifact
+
+The export is one self-contained HTML. Each page is a white section at its 96dpi CSS size, with SVG paths for lines, fills, table borders and cubic curves (including the PDF clip paths that shape them); a layer of extracted `<img>` elements at their PDF transforms; and a layer of real text runs at their PDF coordinates. Each run is anchored at its first character's baseline origin and split into per-character boxes whose widths come from PDFium's loose character bounds, so tracking and justification match the PDF without stretching glyphs. Embedded subsets are repaired before they are used as inline `@font-face` data: a Unicode cmap is rebuilt from the PDF's ToUnicode/CIDToGIDMap data (or, for simple fonts, the subset's own code table), and missing `OS/2`, `post` and `name` tables are supplied so the browser accepts the font. Fonts the PDF did not embed fall back to the family Pdfium actually substituted, and the browser re-measures each character to keep the original advances. Glyphs with no Unicode mapping are cropped from a high-resolution page render and placed at their bounds. Images stay individual elements, so the output toolbar's 编辑文字 mode makes runs `contenteditable` and turns image clicks into a file picker; 保存副本 serializes the edited DOM into a new HTML. A raster layer is used only for constructs that cannot be split, such as bezier stamps, patterns and scanned pages. Print uses named `@page` sizes in millimetres and hides the toolbar and hint.
+
+**The Object-Element Rule.** Never flatten the page into one screenshot. PDFium page objects become real elements: text becomes per-character positioned spans, paths (including cubic beziers and their clip paths) become SVG, and images become `<img>`. Only constructs that cannot be separated (patterns, shadings, clipped images, scanned pages) stay in a bottom raster layer, and the interface says that part is graphic-only rather than pretending it is editable.
 
 ### Empty State
 A dashed 1px Hairline Strong boundary at 12px radius, `56px 24px` padding, with a 44px circular Hover Mist glyph (SearchX or Info at 20px/1.7), a 16px/600 heading, a 13px Quiet Ink line, and one default Ant Design button. It appears for no search matches and for an empty group. The copy names the recovery: clear the search or view all tools.

@@ -34,8 +34,12 @@
   "bundle": {
     "active": true,
     "targets": ["nsis"],
+    "resources": [
+      "resources/pdfium.dll",
+      "resources/pdfium-LICENSE.txt"
+    ],
     "shortDescription": "叮当，一个 Windows 桌面工具合集。",
-    "longDescription": "叮当把常用的小工具收进一个安静的 Windows 工作台。当前包含电子印章与图片压缩。",
+    "longDescription": "叮当把常用的小工具收进一个安静的 Windows 工作台。当前包含电子印章、图片压缩与 PDF 转 HTML。",
     "icon": [
       "icons/32x32.png",
       "icons/128x128.png",

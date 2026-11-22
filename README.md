@@ -1,10 +1,10 @@
 # 叮当
 
-叮当是一个 Windows 桌面工具合集。当前版本已实现电子印章工具，图片压缩工具仍为占位页。
+叮当是一个 Windows 桌面工具合集。当前版本已实现电子印章、图片压缩和 PDF 转 HTML 三个工具。
 
 ## 技术栈
 
-Tauri 2 + React 19 + TypeScript + Ant Design 6 + Lucide + Vite。
+Tauri 2 + React 19 + TypeScript + Ant Design 6 + Lucide + Vite；PDF 转换使用 PDFium（BSD-3-Clause），字体映射修复使用 lopdf（MIT）。
 
 界面控件使用 Ant Design 的成熟实现。界面功能图标使用 Lucide；品牌、应用与安装图标使用 `public/app.png`。
 
@@ -48,6 +48,20 @@ npm run tauri build
 - 全部渲染在本地完成；导出的印章是设计稿，实际公章须按当地规定刻制备案。不提供国徽、机关模板或复刻现有印章的功能。
 - 字体来源、授权与 SHA-256 见 `public/fonts/README.md`。
 
+## 图片压缩
+
+- JPG / PNG / WebP 批量压缩，可设目标体积、最大宽高、质量与输出格式。
+- 逐张显示原始/压缩后体积与画质损耗，支持单张对比预览。
+- 导出全部到指定文件夹，或逐张导出。
+
+## PDF 转 HTML
+
+- 单个 PDF 转成单个可离线打开的 HTML，页面尺寸与分页保持不变。
+- 页面拆成真实元素：表格线、色块与曲线（含贝塞尔印章图形）是可缩放的 SVG 路径，并保留 PDF 的裁剪范围；文字按 PDF 字符坐标逐字定位，保留原始字号、颜色与字距，避免整体拉伸；内嵌字体会按 PDF 的 ToUnicode/CIDToGIDMap 重建 Unicode cmap、补齐浏览器需要的表后随文件携带；未内嵌的字体使用 PDFium 实际替换的字体家族。图片是独立 `<img>`，点击即可替换；图案、渐变、带裁剪的图片等无法拆分的复杂图形与无 Unicode 映射的符号按原样保留为底图或小图。
+- 输出页自带「编辑文字 / 打印 / 保存副本」；修改后另存为新的单文件 HTML，按原毫米尺寸打印。
+- 支持 144 / 192 / 300 DPI 与页面范围；加密 PDF 会请求密码。
+- 使用 PDFium（BSD-3-Clause）做对象级提取，`pdfium.dll` 随应用打包；运行时不联网。
+
 ## 已实现
 
 - 无边框窗口与自绘顶栏：拖动、最小化、最大化、关闭
@@ -56,19 +70,25 @@ npm run tauri build
 - 浅色默认，深色切换，选择在本地保存
 - 两列工具卡片，含悬停、键盘焦点与「打开」动作
 - 电子印章工具：四种模式、实时预览、PNG/SVG 导出与原生保存对话框
-- 图片压缩占位页；Escape 返回
-- 空搜索、空分组、未知工具的状态
+- 图片压缩工具：批量、目标体积、对比预览与批量导出
+- PDF 转 HTML 工具：逐页预览、可编辑文字层、可替换图片、单文件导出与保存副本
+- 空搜索、空分组、未知工具的状态；Escape 返回
 
 ## 目录
 
 - `src/pages/Home.tsx`：工作台首页、搜索与分组过滤
 - `src/pages/SealTool.tsx`：电子印章工作区、模式切换与导出
-- `src/pages/ToolPage.tsx`：图片压缩占位页
+- `src/pages/CompressTool.tsx`：图片压缩工作区
+- `src/pages/PdfTool.tsx`：PDF 转 HTML 工作区、预览、设置与导出
 - `src/seal/`：印章几何、SVG/Canvas 渲染、字体、导出、签名与保存
+- `src/compress/`：图片压缩与批量导出
+- `src-tauri/src/pdf.rs`：PDFium 对象抽取、字体/图片/SVG 重组与单文件 HTML 输出
+- `src/pdf/`：前端保存单文件 HTML
+- `src-tauri/resources/`：`pdfium.dll` 与其 BSD 许可
 - `src/components/`：自绘顶栏、侧栏、工具卡片
 - `src/tools.ts`：工具与分组的产品内容
 - `src/styles/global.css`：布局、主题变量与视觉细节
-- `src/styles/seal.css`：印章工作区布局
+- `src/styles/seal.css` / `compress.css` / `pdf.css`：三个工具的工作区布局
 - `src/styles/fonts.css`：内置字体声明
 - `src-tauri/`：Tauri 外壳、窗口配置、dialog 插件与图标
 - `public/app.png`：应用图标；`src-tauri/icons` 由它生成并携带来源信息
