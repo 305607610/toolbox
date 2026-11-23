@@ -277,9 +277,12 @@ Measured contrast on the shipped values: light Ink on canvas is 15.6:1; light Qu
 
 **Display Font:** Segoe UI Variable Text, Segoe UI, Microsoft YaHei UI, Microsoft YaHei, system-ui, sans-serif
 **Body Font:** the same OS UI stack
-**Label/Mono Font:** none; counts and versions use tabular numerals, not a monospace costume
+**Label/Mono Font:** none for labels; counts and versions use tabular numerals, not a monospace costume. Code editing surfaces (JSON 格式化 and Base64 / URL 编解码) use `"Cascadia Code", "Consolas", "Microsoft YaHei UI", monospace` because column alignment is part of the content.
 
 **Character:** The operating system's own voice: neutral, familiar, and legible in both Chinese and Latin. There is no display face and no second sans in the interface. The brand is a wordmark set in the same stack, not a logo face. The seal artwork is the one exception: its type is content, so it may use the bundled seal faces.
+
+### Code Surfaces
+The JSON formatter and the Base64 / URL editor are the only places a monospace face appears, and only inside the editable text area and the read-only output. It is content, not a label costume: it never replaces the UI stack in headings, tags, counts, or buttons. Everything around the code keeps the operating-system sans stack.
 
 ### Hierarchy
 - **Display** (600, 30px, line-height 1.2, tracking -0.02em): the launcher title and the tool-page H1.

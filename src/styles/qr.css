@@ -1,0 +1,217 @@
+.qr-topbar {
+  justify-content: space-between;
+}
+
+.qr-workspace {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 380px;
+  gap: 20px;
+  align-items: start;
+}
+
+.qr-content-card {
+  min-height: 520px;
+}
+
+.qr-content-body {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  padding: 18px;
+}
+
+.qr-content-body .ant-input,
+.qr-content-body .ant-input-affix-wrapper,
+.qr-content-body textarea.ant-input {
+  font-size: 13px;
+  line-height: 1.6;
+}
+
+.qr-panel {
+  top: 12px;
+}
+
+.qr-preview-wrap {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 18px;
+}
+
+.qr-canvas-box {
+  display: grid;
+  width: 100%;
+  max-width: 300px;
+  aspect-ratio: 1;
+  place-items: center;
+  overflow: hidden;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+}
+
+.qr-canvas {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  image-rendering: pixelated;
+}
+
+.qr-canvas-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  padding: 24px;
+  color: var(--text-2);
+  font-size: 12px;
+  line-height: 1.5;
+  text-align: center;
+}
+
+.qr-export-row {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.qr-render-error {
+  margin-top: 10px;
+  text-align: center;
+}
+
+/* ---------- scanning ---------- */
+
+.qr-scan-card {
+  min-height: 520px;
+}
+
+.qr-scan-drop {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 440px;
+  padding: 40px 24px;
+  text-align: center;
+  cursor: pointer;
+}
+
+.qr-scan-drop:hover {
+  background: color-mix(in srgb, var(--hover) 45%, transparent);
+}
+
+.qr-scan-drop h2 {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 600;
+}
+
+.qr-scan-drop p {
+  margin: 8px 0 22px;
+  color: var(--text-2);
+  font-size: 13px;
+}
+
+.qr-scan-actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 8px;
+}
+
+.qr-scan-preview {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: 22px;
+  background:
+    linear-gradient(45deg, var(--hover) 25%, transparent 25%) 0 0 / 16px 16px,
+    linear-gradient(-45deg, var(--hover) 25%, transparent 25%) 0 8px / 16px 16px,
+    linear-gradient(45deg, transparent 75%, var(--hover) 75%) 8px -8px / 16px 16px,
+    linear-gradient(-45deg, transparent 75%, var(--hover) 75%) -8px 0 / 16px 16px,
+    var(--bg);
+}
+
+.qr-scan-preview img {
+  display: block;
+  max-width: 100%;
+  max-height: 440px;
+  object-fit: contain;
+  border-radius: 6px;
+}
+
+.qr-scan-preview span {
+  color: var(--text-2);
+  font-size: 12px;
+  font-variant-numeric: tabular-nums;
+}
+
+.qr-result-state {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  padding: 48px 24px;
+  color: var(--text-2);
+  font-size: 13px;
+  line-height: 1.6;
+  text-align: center;
+}
+
+.qr-result-state.is-error {
+  color: var(--studio-warn);
+}
+
+.qr-decoded {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 16px 18px 18px;
+}
+
+.qr-decoded-text.ant-input {
+  font-family: "Cascadia Code", "Consolas", "Microsoft YaHei UI", monospace;
+  font-size: 13px;
+  line-height: 1.6;
+  background: var(--bg);
+}
+
+.qr-decoded-actions {
+  display: flex;
+  gap: 8px;
+}
+
+@media (max-width: 1120px) {
+  .qr-workspace {
+    grid-template-columns: minmax(0, 1fr) 340px;
+    gap: 16px;
+  }
+}
+
+@media (max-width: 980px) {
+  .qr-workspace {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .qr-panel {
+    position: static;
+    max-height: none;
+  }
+
+  .qr-content-card,
+  .qr-scan-card {
+    min-height: 0;
+  }
+
+  .qr-scan-drop {
+    min-height: 360px;
+  }
+}

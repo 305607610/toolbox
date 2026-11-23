@@ -329,7 +329,6 @@ export default function PdfTool() {
             ) : (
               <>
                 <h2>拖入 PDF 开始转换</h2>
-                <p>单个 PDF 文件，也可点击选择。</p>
                 <Button
                   type="primary"
                   size="large"

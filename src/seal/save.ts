@@ -1,13 +1,25 @@
 import { invoke } from "@tauri-apps/api/core";
 import { save } from "@tauri-apps/plugin-dialog";
 
-export type SaveFormat = "png" | "svg" | "jpg" | "webp";
+export type SaveFormat =
+  | "png"
+  | "svg"
+  | "jpg"
+  | "webp"
+  | "pdf"
+  | "txt"
+  | "json"
+  | "html";
 
 const MIME: Record<SaveFormat, string> = {
   png: "image/png",
   svg: "image/svg+xml",
   jpg: "image/jpeg",
   webp: "image/webp",
+  pdf: "application/pdf",
+  txt: "text/plain;charset=utf-8",
+  json: "application/json;charset=utf-8",
+  html: "text/html;charset=utf-8",
 };
 
 export type SaveResult =

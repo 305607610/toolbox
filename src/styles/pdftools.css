@@ -1,0 +1,170 @@
+.pdftools-page {
+  max-width: 1240px;
+}
+
+.pdftool-file-card {
+  min-height: 460px;
+}
+
+.pdftool-file-icon {
+  display: grid;
+  flex: none;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  color: var(--accent-strong);
+  background: var(--accent-soft);
+  border-radius: 9px;
+}
+
+.pdftool-file-icon.is-muted {
+  color: var(--text-2);
+  background: var(--hover);
+}
+
+.pdftool-empty {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  min-height: 380px;
+  padding: 40px 24px;
+  text-align: center;
+}
+
+.pdftool-empty h2 {
+  margin: 4px 0 0;
+  font-size: 18px;
+  font-weight: 600;
+}
+
+.pdftool-empty p {
+  max-width: 44ch;
+  margin: 0 0 12px;
+  color: var(--text-2);
+  font-size: 13px;
+  line-height: 1.6;
+}
+
+.pdftool-empty .ant-btn {
+  min-width: 148px;
+}
+
+.pdftool-row-order {
+  display: flex;
+  flex: none;
+  align-items: center;
+  gap: 2px;
+}
+
+.pdftool-row-order .ant-btn {
+  color: var(--text-2);
+}
+
+.pdftool-row-order .ant-btn:disabled {
+  color: var(--text-2);
+  opacity: 0.35;
+}
+
+.pdftool-lock {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  color: var(--studio-warn);
+  font-size: 12px;
+}
+
+.pdftool-warning {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  padding: 10px 12px;
+  color: var(--studio-warn);
+  font-size: 12px;
+  line-height: 1.55;
+  background: color-mix(in srgb, var(--studio-warn) 7%, var(--card));
+  border: 1px solid color-mix(in srgb, var(--studio-warn) 26%, var(--border));
+  border-radius: 10px;
+}
+
+.pdftool-warning svg {
+  flex: none;
+  margin-top: 1px;
+}
+
+.pdftool-summary {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.pdftool-summary-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  color: var(--text-2);
+  font-size: 12px;
+}
+
+.pdftool-summary-row strong {
+  color: var(--text);
+  font-size: 13px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+
+.pdftool-stamp-picker {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+}
+
+.pdftool-stamp-name {
+  overflow: hidden;
+  flex: 1;
+  min-width: 0;
+  color: var(--text-2);
+  font-size: 12px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.pdftool-spin {
+  display: grid;
+  min-height: 380px;
+  place-items: center;
+}
+
+.pdftool-range-help {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  color: var(--text-2);
+  font-size: 12px;
+}
+
+.pdftool-range-help strong {
+  color: var(--text);
+  font-variant-numeric: tabular-nums;
+}
+
+.pdftool-password-row {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+@media (max-width: 980px) {
+  .pdftool-file-card {
+    min-height: 0;
+  }
+
+  .pdftool-empty {
+    min-height: 280px;
+  }
+}

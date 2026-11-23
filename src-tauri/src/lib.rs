@@ -1,5 +1,6 @@
 mod font;
 mod pdf;
+mod pdftools;
 
 use base64::Engine;
 use pdfium_render::prelude::Pdfium;
@@ -8,7 +9,7 @@ use tauri::Manager;
 
 static PDFIUM: OnceLock<Mutex<Option<Pdfium>>> = OnceLock::new();
 
-fn with_pdfium<T>(
+pub(crate) fn with_pdfium<T>(
     dll: &str,
     operation: impl FnOnce(&Pdfium) -> Result<T, String>,
 ) -> Result<T, String> {
@@ -33,7 +34,7 @@ fn save_export_html(path: String, html: String) -> Result<(), String> {
     std::fs::write(&path, html.as_bytes()).map_err(|error| error.to_string())
 }
 
-fn resolve_pdfium(app: &tauri::AppHandle) -> Result<String, String> {
+pub(crate) fn resolve_pdfium(app: &tauri::AppHandle) -> Result<String, String> {
     let mut candidates: Vec<std::path::PathBuf> = Vec::new();
 
     if let Ok(cwd) = std::env::current_dir() {
@@ -114,7 +115,16 @@ pub fn run() {
         .invoke_handler(tauri::generate_handler![
             save_export,
             save_export_html,
-            pdf_convert
+            pdf_convert,
+            pdftools::pdf_info,
+            pdftools::pdf_merge,
+            pdftools::pdf_extract,
+            pdftools::pdf_delete,
+            pdftools::pdf_rotate,
+            pdftools::pdf_images_to_pdf,
+            pdftools::pdf_watermark,
+            pdftools::pdf_stamp,
+            pdftools::pdf_decrypt
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

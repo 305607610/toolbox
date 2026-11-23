@@ -104,6 +104,10 @@
   min-width: 148px;
 }
 
+.pdf-drop h2 + .ant-btn {
+  margin-top: 22px;
+}
+
 /* ---------- workspace ---------- */
 
 .pdf-workspace {

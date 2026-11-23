@@ -480,6 +480,61 @@ kbd {
   transition: color 160ms var(--ease);
 }
 
+.help-tip {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 16px;
+  height: 16px;
+  margin-left: 5px;
+  color: var(--text-2);
+  vertical-align: -2px;
+  border-radius: 50%;
+  cursor: help;
+  transition:
+    color 140ms var(--ease),
+    background-color 140ms var(--ease);
+}
+
+.help-tip:hover,
+.help-tip:focus-visible {
+  color: var(--accent-strong);
+  background: var(--accent-soft);
+}
+
+.help-tip:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 1px;
+}
+
+.tool-segmented.ant-segmented {
+  padding: 2px;
+  background: var(--hover);
+  border-radius: 8px;
+}
+
+.tool-segmented .ant-segmented-item {
+  border-radius: 6px;
+}
+
+.tool-segmented .ant-segmented-item-label {
+  min-height: 26px;
+  padding-inline: 14px;
+  font-size: 12px;
+  line-height: 26px;
+}
+
+.tool-segmented .ant-segmented-item-selected {
+  color: var(--text);
+  background: var(--card);
+  box-shadow: var(--shadow-card);
+}
+
+.tool-segmented
+  .ant-segmented-item:not(.ant-segmented-item-selected):hover {
+  color: var(--text);
+}
+
 .tool-card:hover .tool-open,
 .tool-card:focus-visible .tool-open {
   color: var(--accent-strong);

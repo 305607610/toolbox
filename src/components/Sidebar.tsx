@@ -1,10 +1,28 @@
 import { useMemo } from "react";
 import { Menu } from "antd";
 import type { MenuProps } from "antd";
-import { FileText, Image as ImageIcon, LayoutGrid } from "lucide-react";
+import {
+  Code2,
+  FileText,
+  Image as ImageIcon,
+  LayoutGrid,
+} from "lucide-react";
 import { useLocation, useNavigate, useSearchParams } from "react-router-dom";
 import { useSearchQuery } from "../context/SearchContext";
-import { getTool, toolGroups, tools, toolsInGroup } from "../tools";
+import {
+  getTool,
+  isToolGroupId,
+  toolGroups,
+  tools,
+  toolsInGroup,
+  type ToolGroupId,
+} from "../tools";
+
+const groupIcons: Record<ToolGroupId, typeof FileText> = {
+  documents: FileText,
+  images: ImageIcon,
+  dev: Code2,
+};
 
 export default function Sidebar() {
   const navigate = useNavigate();
@@ -21,7 +39,7 @@ export default function Sidebar() {
     if (openTool) return openTool.groupId;
     if (query.trim()) return "all";
     const group = searchParams.get("group");
-    return group === "documents" || group === "images" ? group : "all";
+    return isToolGroupId(group) ? group : "all";
   }, [location.pathname, query, searchParams]);
 
   const items: MenuProps["items"] = [
@@ -35,26 +53,19 @@ export default function Sidebar() {
         </span>
       ),
     },
-    {
-      key: "documents",
-      icon: <FileText size={17} strokeWidth={1.7} />,
-      label: (
-        <span className="nav-label">
-          <span>{toolGroups[0].label}</span>
-          <span className="nav-count">{toolsInGroup("documents").length}</span>
-        </span>
-      ),
-    },
-    {
-      key: "images",
-      icon: <ImageIcon size={17} strokeWidth={1.7} />,
-      label: (
-        <span className="nav-label">
-          <span>{toolGroups[1].label}</span>
-          <span className="nav-count">{toolsInGroup("images").length}</span>
-        </span>
-      ),
-    },
+    ...toolGroups.map((group) => {
+      const Icon = groupIcons[group.id];
+      return {
+        key: group.id,
+        icon: <Icon size={17} strokeWidth={1.7} />,
+        label: (
+          <span className="nav-label">
+            <span>{group.label}</span>
+            <span className="nav-count">{toolsInGroup(group.id).length}</span>
+          </span>
+        ),
+      };
+    }),
   ];
 
   const handleSelect: MenuProps["onClick"] = ({ key }) => {

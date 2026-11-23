@@ -5,7 +5,12 @@ import { Search, SearchX, X } from "lucide-react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import ToolCard from "../components/ToolCard";
 import { useSearchQuery } from "../context/SearchContext";
-import { tools, type Tool, type ToolGroupId } from "../tools";
+import {
+  isToolGroupId,
+  tools,
+  type Tool,
+  type ToolGroupId,
+} from "../tools";
 
 const matches = (tool: Tool, query: string) => {
   const haystack = [tool.name, tool.description, ...tool.tags]
@@ -21,8 +26,9 @@ export default function Home() {
   const searchRef = useRef<InputRef>(null);
 
   const groupParam = searchParams.get("group");
-  const activeGroup: ToolGroupId | "all" =
-    groupParam === "documents" || groupParam === "images" ? groupParam : "all";
+  const activeGroup: ToolGroupId | "all" = isToolGroupId(groupParam)
+    ? groupParam
+    : "all";
   const trimmed = query.trim();
   const groupTools =
     activeGroup === "all"
@@ -99,11 +105,9 @@ export default function Home() {
             <SearchX size={20} strokeWidth={1.7} />
           </span>
           <h2>{trimmed ? "没有找到工具" : "这个分组还没有工具"}</h2>
-          <p>
-            {trimmed
-              ? "换个关键词试试，比如“印章”或“压缩”。"
-              : "工具会随着版本继续加入。"}
-          </p>
+          {trimmed && (
+            <p>换个关键词试试，比如“印章”或“压缩”。</p>
+          )}
           {trimmed ? (
             <Button onClick={() => setQuery("")}>清除搜索</Button>
           ) : (

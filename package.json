@@ -15,14 +15,17 @@
     "@tauri-apps/api": "^2",
     "@tauri-apps/plugin-dialog": "^2.8.4",
     "antd": "^6.7.1",
+    "jsqr": "^1.4.0",
     "lucide-react": "^1.77.0",
     "opencc-js": "^1.4.2",
+    "qrcode": "^1.5.4",
     "react": "^19.1.0",
     "react-dom": "^19.1.0",
     "react-router-dom": "^7.18.6"
   },
   "devDependencies": {
     "@tauri-apps/cli": "^2",
+    "@types/qrcode": "^1.5.6",
     "@types/react": "^19.1.8",
     "@types/react-dom": "^19.1.6",
     "@vitejs/plugin-react": "^6.0.2",

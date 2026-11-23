@@ -5,9 +5,15 @@ import zhCN from "antd/locale/zh_CN";
 import { HashRouter, Navigate, Route, Routes } from "react-router-dom";
 import AppShell from "./components/AppShell";
 import CompressTool from "./pages/CompressTool";
+import ConvertTool from "./pages/ConvertTool";
+import EncodingTool from "./pages/EncodingTool";
 import Home from "./pages/Home";
 import IdPhotoTool from "./pages/IdPhotoTool";
+import ImageEditTool from "./pages/ImageEditTool";
+import JsonTool from "./pages/JsonTool";
 import PdfTool from "./pages/PdfTool";
+import PdfToolsTool from "./pages/PdfToolsTool";
+import QrCodeTool from "./pages/QrCodeTool";
 import SealTool from "./pages/SealTool";
 import ToolPage from "./pages/ToolPage";
 import { useThemePreference } from "./hooks/useThemePreference";
@@ -99,6 +105,12 @@ export default function App() {
               <Route path="tool/compress" element={<CompressTool />} />
               <Route path="tool/idphoto" element={<IdPhotoTool />} />
               <Route path="tool/pdf" element={<PdfTool />} />
+              <Route path="tool/convert" element={<ConvertTool />} />
+              <Route path="tool/imageedit" element={<ImageEditTool />} />
+              <Route path="tool/qrcode" element={<QrCodeTool />} />
+              <Route path="tool/json" element={<JsonTool />} />
+              <Route path="tool/base64" element={<EncodingTool />} />
+              <Route path="tool/pdftools" element={<PdfToolsTool />} />
               <Route path="tool/:toolId" element={<ToolPage />} />
               <Route path="*" element={<Navigate to="/" replace />} />
             </Route>
