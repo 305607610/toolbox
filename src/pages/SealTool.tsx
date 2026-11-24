@@ -36,6 +36,7 @@ import { CompanySeal, companyLayout } from "../seal/svg/CompanySeal";
 import { OvalSeal, ovalLayout } from "../seal/svg/OvalSeal";
 import PersonalSealCanvas from "../seal/personal/PersonalSealCanvas";
 import SignatureCanvas from "../seal/signature/SignatureCanvas";
+import SignatureImagePreview from "../seal/signature/SignatureImagePreview";
 import { useSignaturePad } from "../seal/signature/useSignaturePad";
 import { usePersonalFont } from "../seal/usePersonalFont";
 import { drawPersonalSeal } from "../seal/personal/drawPersonalSeal";
@@ -352,7 +353,11 @@ export default function SealTool() {
 
   const exportSignature = async () => {
     if (!signature.hasInk) {
-      message.warning("请先手写签名");
+      message.warning(
+        signature.source === "image"
+          ? "请先上传签名图片"
+          : "请先手写签名",
+      );
       return;
     }
 
@@ -411,7 +416,15 @@ export default function SealTool() {
               ...(oval.top.trim() ? [] : ["请填写上弧文字。"]),
               ...ovalLayoutData.warnings,
             ]
-          : [...(signature.hasInk ? [] : ["请先手写签名。"])];
+          : [
+              ...(signature.hasInk
+                ? []
+                : [
+                    signature.source === "image"
+                      ? "请先上传签名图片。"
+                      : "请先手写签名。",
+                  ]),
+            ];
 
   const svgMenu: MenuProps = {
     items: [
@@ -442,7 +455,9 @@ export default function SealTool() {
         ? `${mm(personal.size)}mm · ${personal.carving === "zhu" ? "朱文" : "白文"}`
         : mode === "oval"
           ? `${mm(oval.width)} × ${mm(oval.height)}mm`
-          : "手写签名";
+          : signature.source === "image"
+            ? "上传签名"
+            : "手写签名";
 
   const panelTabs = modeOptions.map((option) => ({
     key: option.value,
@@ -566,7 +581,11 @@ export default function SealTool() {
             )}
             {mode === "signature" && (
               <div className="signature-artboard">
-                <SignatureCanvas signature={signature} />
+                {signature.source === "draw" ? (
+                  <SignatureCanvas signature={signature} />
+                ) : (
+                  <SignatureImagePreview signature={signature} />
+                )}
               </div>
             )}
           </div>

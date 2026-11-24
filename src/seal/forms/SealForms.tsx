@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import type { ReactNode } from "react";
 import {
   Button,
@@ -12,8 +12,20 @@ import {
   Slider,
   Switch,
 } from "antd";
-import { Eraser, Redo2, RotateCcw, Undo2 } from "lucide-react";
-import type { SignaturePad } from "../signature/useSignaturePad";
+import {
+  Eraser,
+  ImagePlus,
+  PenTool,
+  Redo2,
+  RotateCcw,
+  Trash2,
+  Undo2,
+} from "lucide-react";
+import type {
+  SignatureInkMode,
+  SignaturePad,
+  SignatureSource,
+} from "../signature/useSignaturePad";
 import type {
   OfficialConfig,
   OfficialType,
@@ -1045,80 +1057,222 @@ export function OvalForm({
   );
 }
 
+function InkColorPicker({
+  value,
+  onChange,
+}: {
+  value: string;
+  onChange: (value: string) => void;
+}) {
+  return (
+    <ColorPicker
+      value={value}
+      onChangeComplete={(color) => onChange(color.toHexString())}
+      showText
+      presets={[
+        {
+          label: "常用墨色",
+          colors: ["#1C1D20", "#1E3A5F", "#334155"],
+        },
+      ]}
+    />
+  );
+}
+
 export function SignatureControls({
   signature,
 }: {
   signature: SignaturePad;
 }) {
+  const inputRef = useRef<HTMLInputElement>(null);
+
   return (
     <Form layout="vertical" requiredMark={false} className="seal-form">
-      <Section title="笔迹">
-        <MetricField
-          label="笔宽"
-          value={signature.penWidth}
-          min={1.5}
-          max={6}
-          step={0.1}
-          unit=""
-          precision={1}
-          onChange={signature.setPenWidth}
-        />
-        <MetricField
-          label="平滑"
-          value={signature.smoothing}
-          min={0}
-          max={100}
-          step={1}
-          unit="%"
-          precision={0}
-          onChange={signature.setSmoothing}
-        />
-        <Form.Item label="墨色">
-          <ColorPicker
-            value={signature.color}
-            onChangeComplete={(color) =>
-              signature.setColor(color.toHexString())
-            }
-            showText
-            presets={[
-              {
-                label: "常用墨色",
-                colors: ["#1C1D20", "#1E3A5F", "#334155"],
-              },
-            ]}
+      <Segmented
+        block
+        className="signature-source-switch"
+        value={signature.source}
+        options={[
+          {
+            value: "draw",
+            label: (
+              <span className="signature-source-option">
+                <PenTool size={14} strokeWidth={1.7} aria-hidden="true" />
+                手写
+              </span>
+            ),
+          },
+          {
+            value: "image",
+            label: (
+              <span className="signature-source-option">
+                <ImagePlus size={14} strokeWidth={1.7} aria-hidden="true" />
+                上传图片
+              </span>
+            ),
+          },
+        ]}
+        onChange={(value) => signature.setSource(value as SignatureSource)}
+      />
+
+      <input
+        ref={inputRef}
+        type="file"
+        accept="image/*"
+        tabIndex={-1}
+        className="visually-hidden"
+        onChange={(event) => {
+          const file = event.target.files?.[0];
+          if (file) void signature.loadImage(file);
+          event.target.value = "";
+        }}
+      />
+
+      {signature.source === "draw" ? (
+        <Section title="笔迹">
+          <MetricField
+            label="笔宽"
+            value={signature.penWidth}
+            min={1.5}
+            max={6}
+            step={0.1}
+            unit=""
+            precision={1}
+            onChange={signature.setPenWidth}
           />
-        </Form.Item>
-        <div className="signature-actions">
-          <Button
-            icon={<Undo2 size={15} strokeWidth={1.7} />}
-            disabled={!signature.canUndo}
-            onClick={signature.undo}
-          >
-            撤销
-          </Button>
-          <Button
-            icon={<Redo2 size={15} strokeWidth={1.7} />}
-            disabled={!signature.canRedo}
-            onClick={signature.redo}
-          >
-            重做
-          </Button>
-          <Popconfirm
-            title="清空当前签名？"
-            okText="清空"
-            cancelText="取消"
-            disabled={!signature.hasInk}
-            onConfirm={signature.clear}
-          >
+          <MetricField
+            label="平滑"
+            value={signature.smoothing}
+            min={0}
+            max={100}
+            step={1}
+            unit="%"
+            precision={0}
+            onChange={signature.setSmoothing}
+          />
+          <Form.Item label="墨色">
+            <InkColorPicker
+              value={signature.color}
+              onChange={signature.setColor}
+            />
+          </Form.Item>
+          <div className="signature-actions">
             <Button
-              icon={<Eraser size={15} strokeWidth={1.7} />}
-              disabled={!signature.hasInk}
+              icon={<Undo2 size={15} strokeWidth={1.7} />}
+              disabled={!signature.canUndo}
+              onClick={signature.undo}
             >
-              清空
+              撤销
             </Button>
-          </Popconfirm>
-        </div>
-      </Section>
+            <Button
+              icon={<Redo2 size={15} strokeWidth={1.7} />}
+              disabled={!signature.canRedo}
+              onClick={signature.redo}
+            >
+              重做
+            </Button>
+            <Popconfirm
+              title="清空当前签名？"
+              okText="清空"
+              cancelText="取消"
+              disabled={!signature.hasInk}
+              onConfirm={signature.clear}
+            >
+              <Button
+                icon={<Eraser size={15} strokeWidth={1.7} />}
+                disabled={!signature.hasInk}
+              >
+                清空
+              </Button>
+            </Popconfirm>
+          </div>
+        </Section>
+      ) : (
+        <Section title="签名图片">
+          <div className="signature-image-picker">
+            <Button
+              icon={<ImagePlus size={15} strokeWidth={1.7} />}
+              onClick={() => inputRef.current?.click()}
+            >
+              {signature.imageInfo ? "更换图片" : "选择签名图片"}
+            </Button>
+            {signature.imageInfo && (
+              <Popconfirm
+                title="移除签名图片？"
+                okText="移除"
+                cancelText="取消"
+                onConfirm={signature.removeImage}
+              >
+                <Button icon={<Trash2 size={15} strokeWidth={1.7} />}>
+                  移除
+                </Button>
+              </Popconfirm>
+            )}
+          </div>
+
+          {signature.imageInfo && (
+            <div className="signature-image-meta">
+              <span
+                className="signature-image-name"
+                title={signature.imageInfo.name}
+              >
+                {signature.imageInfo.name}
+              </span>
+            </div>
+          )}
+
+          {signature.imageError && (
+            <p className="signature-image-error">{signature.imageError}</p>
+          )}
+
+          {!signature.imageHasAlpha && (
+            <>
+              <MetricField
+                label="去底阈值"
+                value={signature.threshold}
+                min={2}
+                max={60}
+                step={1}
+                unit="%"
+                precision={0}
+                onChange={signature.setThreshold}
+              />
+              <MetricField
+                label="边缘羽化"
+                value={signature.softness}
+                min={0}
+                max={40}
+                step={1}
+                unit="%"
+                precision={0}
+                onChange={signature.setSoftness}
+              />
+            </>
+          )}
+          <Form.Item label="墨色处理">
+            <Segmented
+              block
+              size="small"
+              value={signature.inkMode}
+              options={[
+                { value: "original", label: "保留原色" },
+                { value: "solid", label: "统一墨色" },
+              ]}
+              onChange={(value) =>
+                signature.setInkMode(value as SignatureInkMode)
+              }
+            />
+          </Form.Item>
+          {signature.inkMode === "solid" && (
+            <Form.Item label="墨色">
+              <InkColorPicker
+                value={signature.color}
+                onChange={signature.setColor}
+              />
+            </Form.Item>
+          )}
+        </Section>
+      )}
 
       <Section title="导出">
         <MetricField
