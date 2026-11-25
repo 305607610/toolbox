@@ -132,7 +132,12 @@ export default function QrCodeTool() {
       color: { dark: foreground, light: background },
     })
       .then(() => {
-        if (!cancelled) setRenderError("");
+        if (cancelled) return;
+        // qrcode 会把像素尺寸写成内联样式（如 512px），覆盖 CSS 的百分比尺寸，
+        // 画布因此撑出预览框被裁切。清掉内联宽高，让预览按容器缩放。
+        canvas.style.width = "";
+        canvas.style.height = "";
+        setRenderError("");
       })
       .catch(() => {
         if (!cancelled) setRenderError("内容过长，无法生成二维码");
