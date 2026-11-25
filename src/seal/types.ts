@@ -14,9 +14,11 @@ export interface OfficialConfig {
   number: string;
   diameter: number;
   fontId: FontId;
+  fontWeight: number;
   star: boolean;
   color: string;
   border: number;
+  aging: number;
   textInset: number;
   arcSpan: number;
   fontSizeMode: SizeMode;
@@ -41,9 +43,11 @@ export interface PersonalConfig {
   shape: "square" | "round";
   size: number;
   fontId: FontId;
+  fontWeight: number;
   carving: "zhu" | "bai";
   color: string;
   border: number;
+  aging: number;
   textInset: number;
   glyphGap: number;
   fontSizeMode: SizeMode;
@@ -61,8 +65,10 @@ export interface OvalConfig {
   width: number;
   height: number;
   fontId: FontId;
+  fontWeight: number;
   color: string;
   border: number;
+  aging: number;
   topInset: number;
   topArcSpan: number;
   topFontSizeMode: SizeMode;
@@ -90,9 +96,11 @@ export const DEFAULT_OFFICIAL: OfficialConfig = {
   number: "",
   diameter: 42,
   fontId: "simsun",
+  fontWeight: 500,
   star: true,
   color: DEFAULT_COLOR,
   border: 1.2,
+  aging: 0,
   textInset: 0.8,
   arcSpan: 140,
   fontSizeMode: "auto",
@@ -117,9 +125,11 @@ export const DEFAULT_PERSONAL: PersonalConfig = {
   shape: "square",
   size: 22,
   fontId: "chongxi",
+  fontWeight: 500,
   carving: "zhu",
   color: DEFAULT_COLOR,
   border: 1,
+  aging: 0,
   textInset: 1.2,
   glyphGap: 0.4,
   fontSizeMode: "auto",
@@ -137,8 +147,10 @@ export const DEFAULT_OVAL: OvalConfig = {
   width: 40,
   height: 30,
   fontId: "simsun",
+  fontWeight: 500,
   color: DEFAULT_COLOR,
   border: 1.2,
+  aging: 0,
   topInset: 0.8,
   topArcSpan: 140,
   topFontSizeMode: "auto",

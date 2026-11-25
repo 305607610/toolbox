@@ -1,5 +1,6 @@
 import { fontFamily } from "../fonts";
 import { personalSealLayout } from "../geometry";
+import { applyCanvasAging } from "../aging";
 import type { PersonalConfig } from "../types";
 
 export interface PersonalDrawOptions {
@@ -83,26 +84,22 @@ export function drawPersonalSeal(
     const family = fontFamily(config.fontId);
 
     context.textAlign = "center";
-    context.textBaseline = "alphabetic";
+    context.textBaseline = "middle";
     context.fillStyle = config.carving === "bai" ? "#000000" : color;
     context.globalCompositeOperation =
       config.carving === "bai" ? "destination-out" : "source-over";
 
     for (const cell of cells) {
-      context.font = `${cell.fontSize}px ${family}`;
-      const metrics = context.measureText(cell.char);
-      const ascent =
-        metrics.actualBoundingBoxAscent ?? cell.fontSize * 0.8;
-      const descent =
-        metrics.actualBoundingBoxDescent ?? cell.fontSize * 0.2;
-      const baseline = cell.y + (ascent - descent) / 2;
-      context.fillText(cell.char, cell.x, baseline);
+      context.font = `${config.fontWeight} ${cell.fontSize}px ${family}`;
+      context.fillText(cell.char, cell.x, cell.y);
     }
 
     context.globalCompositeOperation = "source-over";
   }
 
   drawFrame();
+
+  applyCanvasAging(context, { amount: config.aging, pxPerMm });
 
   if (background === "white") {
     context.globalCompositeOperation = "destination-over";

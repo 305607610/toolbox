@@ -10,6 +10,8 @@ import {
 } from "../geometry";
 import { measureSpacedTextMm } from "../measure";
 import { fontFamily } from "../fonts";
+import { agingStrength } from "../aging";
+import { AgingFilter } from "./AgingFilter";
 
 export interface OvalArcFit {
   fontSizeMm: number;
@@ -71,7 +73,13 @@ export function ovalLayout(config: OvalConfig): OvalLayout {
   };
   const topWidthFor = (size: number) =>
     topText
-      ? measureSpacedTextMm(topText, size, family, 500, topSpacing)
+      ? measureSpacedTextMm(
+          topText,
+          size,
+          family,
+          config.fontWeight,
+          topSpacing,
+        )
       : 0;
 
   let topAuto = topMax;
@@ -122,7 +130,7 @@ export function ovalLayout(config: OvalConfig): OvalLayout {
         centerText,
         centerSize,
         family,
-        500,
+        config.fontWeight,
         centerSpacing,
       )
     : 0;
@@ -155,7 +163,13 @@ export function ovalLayout(config: OvalConfig): OvalLayout {
   };
   const bottomWidthFor = (size: number) =>
     bottomText
-      ? measureSpacedTextMm(bottomText, size, family, 500, bottomSpacing)
+      ? measureSpacedTextMm(
+          bottomText,
+          size,
+          family,
+          config.fontWeight,
+          bottomSpacing,
+        )
       : 0;
 
   let bottomAuto = bottomMax;
@@ -208,7 +222,7 @@ export function ovalLayout(config: OvalConfig): OvalLayout {
         numberText,
         numberSize,
         family,
-        400,
+        config.fontWeight,
         numberSpacing,
       )
     : 0;
@@ -285,8 +299,11 @@ export function ovalLayout(config: OvalConfig): OvalLayout {
 export const OvalSeal = forwardRef<SVGSVGElement, { config: OvalConfig }>(
   function OvalSeal({ config }, ref) {
     const rawId = useId();
-    const topId = `oval-top-${rawId.replace(/:/g, "")}`;
-    const bottomId = `oval-bottom-${rawId.replace(/:/g, "")}`;
+    const suffix = rawId.replace(/:/g, "");
+    const topId = `oval-top-${suffix}`;
+    const bottomId = `oval-bottom-${suffix}`;
+    const agingId = `oval-aging-${suffix}`;
+    const aged = agingStrength(config.aging) > 0;
     const { width, height, color, border } = config;
     const cx = width / 2;
     const cy = height / 2;
@@ -307,74 +324,78 @@ export const OvalSeal = forwardRef<SVGSVGElement, { config: OvalConfig }>(
         <defs>
           <path id={topId} d={layout.topPath} fill="none" />
           <path id={bottomId} d={layout.bottomPath} fill="none" />
+          <AgingFilter id={agingId} amount={config.aging} />
         </defs>
 
-        <ellipse
-          cx={cx}
-          cy={cy}
-          rx={rx - border / 2}
-          ry={ry - border / 2}
-          fill="none"
-          stroke={color}
-          strokeWidth={border}
-        />
+        <g filter={aged ? `url(#${agingId})` : undefined}>
+          <ellipse
+            cx={cx}
+            cy={cy}
+            rx={rx - border / 2}
+            ry={ry - border / 2}
+            fill="none"
+            stroke={color}
+            strokeWidth={border}
+          />
 
-        {config.top.trim() && (
-          <text fill={color} fontFamily={family} fontWeight={500}>
-            <textPath
-              href={`#${topId}`}
-              startOffset="50%"
+          {config.top.trim() && (
+            <text fill={color} fontFamily={family} fontWeight={config.fontWeight}>
+              <textPath
+                href={`#${topId}`}
+                startOffset="50%"
+                textAnchor="middle"
+                fontSize={layout.top.fontSizeMm}
+                letterSpacing={config.topSpacing}
+              >
+                {config.top.trim()}
+              </textPath>
+            </text>
+          )}
+
+          {config.center.trim() && (
+            <text
+              x={cx}
+              y={layout.centerY}
+              fill={color}
+              fontFamily={family}
+              fontSize={layout.center.fontSizeMm}
+              fontWeight={config.fontWeight}
+              letterSpacing={config.centerSpacing}
               textAnchor="middle"
-              fontSize={layout.top.fontSizeMm}
-              letterSpacing={config.topSpacing}
             >
-              {config.top.trim()}
-            </textPath>
-          </text>
-        )}
+              {config.center.trim()}
+            </text>
+          )}
 
-        {config.center.trim() && (
-          <text
-            x={cx}
-            y={layout.centerY}
-            fill={color}
-            fontFamily={family}
-            fontSize={layout.center.fontSizeMm}
-            fontWeight={500}
-            letterSpacing={config.centerSpacing}
-            textAnchor="middle"
-          >
-            {config.center.trim()}
-          </text>
-        )}
+          {config.bottom.trim() && (
+            <text fill={color} fontFamily={family} fontWeight={config.fontWeight}>
+              <textPath
+                href={`#${bottomId}`}
+                startOffset="50%"
+                textAnchor="middle"
+                fontSize={layout.bottom.fontSizeMm}
+                letterSpacing={config.bottomSpacing}
+              >
+                {config.bottom.trim()}
+              </textPath>
+            </text>
+          )}
 
-        {config.bottom.trim() && (
-          <text fill={color} fontFamily={family} fontWeight={500}>
-            <textPath
-              href={`#${bottomId}`}
-              startOffset="50%"
+          {config.number.trim() && (
+            <text
+              x={cx}
+              y={layout.numberY}
+              fill={color}
+              fontFamily={family}
+              fontWeight={config.fontWeight}
+              fontSize={layout.number.fontSizeMm}
+              letterSpacing={config.numberSpacing}
               textAnchor="middle"
-              fontSize={layout.bottom.fontSizeMm}
-              letterSpacing={config.bottomSpacing}
             >
-              {config.bottom.trim()}
-            </textPath>
-          </text>
-        )}
-
-        {config.number.trim() && (
-          <text
-            x={cx}
-            y={layout.numberY}
-            fill={color}
-            fontFamily={family}
-            fontSize={layout.number.fontSizeMm}
-            letterSpacing={config.numberSpacing}
-            textAnchor="middle"
-          >
-            {config.number.trim()}
-          </text>
-        )}
+              {config.number.trim()}
+            </text>
+          )}
+        </g>
       </svg>
     );
   },

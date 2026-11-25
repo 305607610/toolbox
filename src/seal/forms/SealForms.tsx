@@ -49,6 +49,7 @@ import type { PersonalFontState } from "../usePersonalFont";
 import type { PersonalLayout } from "../geometry";
 import type { CompanyLayout } from "../svg/CompanySeal";
 import type { OvalLayout } from "../svg/OvalSeal";
+import HelpTip from "../../components/HelpTip";
 
 interface MetricFieldProps {
   label: string;
@@ -62,6 +63,7 @@ interface MetricFieldProps {
   disabled?: boolean;
   extra?: ReactNode;
   hint?: string;
+  tip?: string;
 }
 
 function MetricField({
@@ -76,6 +78,7 @@ function MetricField({
   disabled = false,
   extra,
   hint,
+  tip,
 }: MetricFieldProps) {
   const commit = (next: number | null) => {
     if (next === null || Number.isNaN(next)) return;
@@ -85,7 +88,10 @@ function MetricField({
   return (
     <div className={`metric-field${disabled ? " is-disabled" : ""}`}>
       <div className="metric-head">
-        <span className="metric-label">{label}</span>
+        <span className="metric-label">
+          {label}
+          {tip && <HelpTip text={tip} />}
+        </span>
         <div className="metric-tail">
           {extra}
           <InputNumber
@@ -212,7 +218,7 @@ function FontSelect({
 
   const options = fontOptions(ids).map((font) => ({
     value: font.id,
-    label: font.note ? `${font.label} · ${font.note}` : font.label,
+    label: font.label,
     disabled: unavailable.has(font.id),
   }));
 
@@ -554,6 +560,17 @@ export function CompanyForm({
           unit="mm"
           onChange={(value) => onChange({ border: value })}
         />
+        <MetricField
+          label="做旧程度"
+          value={config.aging}
+          min={0}
+          max={100}
+          step={1}
+          unit="%"
+          precision={0}
+          onChange={(value) => onChange({ aging: value })}
+          tip="用不规则的泛白模拟印泥磨损，0 为关闭。"
+        />
         <Form.Item label="字体">
           <FontSelect
             ids={OFFICIAL_FONT_IDS}
@@ -561,6 +578,16 @@ export function CompanyForm({
             onChange={(fontId) => onChange({ fontId })}
           />
         </Form.Item>
+        <MetricField
+          label="字体粗细"
+          value={config.fontWeight}
+          min={300}
+          max={800}
+          step={100}
+          unit=""
+          precision={0}
+          onChange={(value) => onChange({ fontWeight: value })}
+        />
         <Form.Item label="印章颜色">
           <ColorField
             value={config.color}
@@ -627,6 +654,16 @@ export function PersonalForm({
             onChange={(fontId) => onChange({ fontId })}
           />
         </Form.Item>
+        <MetricField
+          label="字体粗细"
+          value={config.fontWeight}
+          min={300}
+          max={800}
+          step={100}
+          unit=""
+          precision={0}
+          onChange={(value) => onChange({ fontWeight: value })}
+        />
         {fontState.loading && (
           <div className="field-note">正在加载篆体…</div>
         )}
@@ -737,6 +774,17 @@ export function PersonalForm({
           step={0.1}
           unit="mm"
           onChange={(value) => onChange({ border: value })}
+        />
+        <MetricField
+          label="做旧程度"
+          value={config.aging}
+          min={0}
+          max={100}
+          step={1}
+          unit="%"
+          precision={0}
+          onChange={(value) => onChange({ aging: value })}
+          tip="用不规则的泛白模拟印泥磨损，0 为关闭。"
         />
         <Form.Item label="刻法">
           <Segmented
@@ -1037,6 +1085,17 @@ export function OvalForm({
           unit="mm"
           onChange={(value) => onChange({ border: value })}
         />
+        <MetricField
+          label="做旧程度"
+          value={config.aging}
+          min={0}
+          max={100}
+          step={1}
+          unit="%"
+          precision={0}
+          onChange={(value) => onChange({ aging: value })}
+          tip="用不规则的泛白模拟印泥磨损，0 为关闭。"
+        />
         <Form.Item label="字体">
           <FontSelect
             ids={OFFICIAL_FONT_IDS}
@@ -1044,6 +1103,16 @@ export function OvalForm({
             onChange={(fontId) => onChange({ fontId })}
           />
         </Form.Item>
+        <MetricField
+          label="字体粗细"
+          value={config.fontWeight}
+          min={300}
+          max={800}
+          step={100}
+          unit=""
+          precision={0}
+          onChange={(value) => onChange({ fontWeight: value })}
+        />
         <Form.Item label="印章颜色">
           <ColorField
             value={config.color}

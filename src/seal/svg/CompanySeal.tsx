@@ -9,6 +9,8 @@ import {
 } from "../geometry";
 import { measureSpacedTextMm } from "../measure";
 import { fontFamily } from "../fonts";
+import { agingStrength } from "../aging";
+import { AgingFilter } from "./AgingFilter";
 
 export interface CompanyFit {
   fontSizeMm: number;
@@ -63,7 +65,9 @@ export function companyLayout(config: OfficialConfig): CompanyLayout {
   const arcLengthFor = (size: number) =>
     Math.max(0, radiusFor(size)) * spanRad;
   const widthFor = (size: number) =>
-    text ? measureSpacedTextMm(text, size, family, 500, spacing) : 0;
+    text
+      ? measureSpacedTextMm(text, size, family, config.fontWeight, spacing)
+      : 0;
 
   let autoFontSize = maxFont;
   if (text) {
@@ -106,7 +110,7 @@ export function companyLayout(config: OfficialConfig): CompanyLayout {
         bottomText,
         bottomSize,
         family,
-        500,
+        config.fontWeight,
         config.bottomSpacing,
       )
     : 0;
@@ -131,7 +135,7 @@ export function companyLayout(config: OfficialConfig): CompanyLayout {
         numberText,
         numberSize,
         family,
-        400,
+        config.fontWeight,
         config.numberSpacing,
       )
     : 0;
@@ -243,8 +247,11 @@ export function companyLayout(config: OfficialConfig): CompanyLayout {
 export const CompanySeal = forwardRef<SVGSVGElement, { config: OfficialConfig }>(
   function CompanySeal({ config }, ref) {
     const rawId = useId();
-    const arcId = `company-arc-${rawId.replace(/:/g, "")}`;
-    const numberArcId = `company-number-arc-${rawId.replace(/:/g, "")}`;
+    const suffix = rawId.replace(/:/g, "");
+    const arcId = `company-arc-${suffix}`;
+    const numberArcId = `company-number-arc-${suffix}`;
+    const agingId = `company-aging-${suffix}`;
+    const aged = agingStrength(config.aging) > 0;
     const { diameter, color, border, star, company, typeLabel, number } =
       config;
     const radius = diameter / 2;
@@ -266,88 +273,93 @@ export const CompanySeal = forwardRef<SVGSVGElement, { config: OfficialConfig }>
           {layout.numberPath && (
             <path id={numberArcId} d={layout.numberPath} fill="none" />
           )}
+          <AgingFilter id={agingId} amount={config.aging} />
         </defs>
 
-        <circle
-          cx={radius}
-          cy={radius}
-          r={radius - border / 2}
-          fill="none"
-          stroke={color}
-          strokeWidth={border}
-        />
-
-        {star && (
-          <polygon
-            points={starPointsString(
-              layout.star.centerX,
-              layout.star.centerY,
-              layout.star.outer,
-              layout.star.inner,
-            )}
-            fill={color}
+        <g filter={aged ? `url(#${agingId})` : undefined}>
+          <circle
+            cx={radius}
+            cy={radius}
+            r={radius - border / 2}
+            fill="none"
+            stroke={color}
+            strokeWidth={border}
           />
-        )}
 
-        {label && (
-          <text fill={color} fontFamily={family} fontWeight={500}>
-            <textPath
-              href={`#${arcId}`}
-              startOffset="50%"
+          {star && (
+            <polygon
+              points={starPointsString(
+                layout.star.centerX,
+                layout.star.centerY,
+                layout.star.outer,
+                layout.star.inner,
+              )}
+              fill={color}
+            />
+          )}
+
+          {label && (
+            <text fill={color} fontFamily={family} fontWeight={config.fontWeight}>
+              <textPath
+                href={`#${arcId}`}
+                startOffset="50%"
+                textAnchor="middle"
+                fontSize={layout.fit.fontSizeMm}
+                letterSpacing={config.letterSpacing}
+              >
+                {label}
+              </textPath>
+            </text>
+          )}
+
+          {typeLabel.trim() && (
+            <text
+              x={radius}
+              y={layout.bottomY}
+              fill={color}
+              fontFamily={family}
+              fontSize={layout.bottom.fontSizeMm}
+              fontWeight={config.fontWeight}
+              letterSpacing={config.bottomSpacing}
               textAnchor="middle"
-              fontSize={layout.fit.fontSizeMm}
-              letterSpacing={config.letterSpacing}
             >
-              {label}
-            </textPath>
-          </text>
-        )}
+              {typeLabel.trim()}
+            </text>
+          )}
 
-        {typeLabel.trim() && (
-          <text
-            x={radius}
-            y={layout.bottomY}
-            fill={color}
-            fontFamily={family}
-            fontSize={layout.bottom.fontSizeMm}
-            fontWeight={500}
-            letterSpacing={config.bottomSpacing}
-            textAnchor="middle"
-          >
-            {typeLabel.trim()}
-          </text>
-        )}
+          {number.trim() && layout.numberLayout === "arc" && (
+            <text
+              fill={color}
+              fontFamily={family}
+              fontWeight={config.fontWeight}
+              fontSize={layout.number.fontSizeMm}
+              letterSpacing={config.numberSpacing}
+            >
+              <textPath
+                href={`#${numberArcId}`}
+                startOffset="50%"
+                textAnchor="middle"
+              >
+                {number.trim()}
+              </textPath>
+            </text>
+          )}
 
-        {number.trim() && layout.numberLayout === "arc" && (
-          <text
-            fill={color}
-            fontFamily={family}
-            fontSize={layout.number.fontSizeMm}
-            letterSpacing={config.numberSpacing}
-          >
-            <textPath
-              href={`#${numberArcId}`}
-              startOffset="50%"
+          {number.trim() && layout.numberLayout === "line" && (
+            <text
+              x={radius}
+              y={layout.numberY}
+              fill={color}
+              fontFamily={family}
+              fontWeight={config.fontWeight}
+              fontSize={layout.number.fontSizeMm}
+              letterSpacing={config.numberSpacing}
               textAnchor="middle"
             >
               {number.trim()}
-            </textPath>
-          </text>
-        )}
-
-        {number.trim() && layout.numberLayout === "line" && (
-          <text
-            x={radius}
-            y={layout.numberY}
-            fill={color}
-            fontFamily={family}
-            fontSize={layout.number.fontSizeMm}
-            letterSpacing={config.numberSpacing}
-            textAnchor="middle"
-          >
-            {number.trim()}
-          </text>
-        )}
+            </text>
+          )}
+        </g>
       </svg>
     );
   },
